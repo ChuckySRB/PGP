@@ -1,4 +1,5 @@
 import tkinter as tk
+from PIL import ImageTk, Image
 
 # Funkcija za dugme
 def send_msg(label, text):
@@ -10,10 +11,15 @@ def switch_windows():
 # Prozor na kome se pravi sve
 window = tk.Tk()
 window.title("PGP")
-window.geometry("400x300")  # Width x Height
+window.geometry("800x800")  # Width x Height
 window.geometry("+500+200")  # X position + Y position
 window.configure(bg="#e52a30")
 
+image = Image.open("asets/neoncity.png")
+image = image.resize((800, 800), Image.ANTIALIAS)  # Resize the image if needed
+background_image = ImageTk.PhotoImage(image)
+background_label = tk.Label(window, image=background_image)
+background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
 window2 = tk.Tk()
 window2.geometry("400x300")  # Width x Height
