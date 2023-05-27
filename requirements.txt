@@ -1,0 +1,9 @@
+pillow
+rsa #rsa
+cryptography #dsa aes 3des cast-128 (cast5) cbc
+pyaes #aes
+pycryptodome #elgamal
+#hashlib vec instaliran #sha-1
+#base64 radix format
+#shutil #zip
+#zipfile #zip
