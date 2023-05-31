@@ -5,8 +5,7 @@
       <change afterPath="$PROJECT_DIR$/gui/msgsend/msgsend.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/implementation/msgsend/msgencryption.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui/configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/configuration.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/util.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/keygen/keygen.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/keygen/keygen.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -168,6 +167,8 @@
       <workItem from="1685119771880" duration="1653000" />
       <workItem from="1685171278879" duration="4298000" />
       <workItem from="1685271783850" duration="4341000" />
+      <workItem from="1685282258218" duration="1446000" />
+      <workItem from="1685306552368" duration="33000" />
     </task>
     <servers />
   </component>
@@ -186,9 +187,13 @@
     </option>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+<<<<<<< HEAD
     <SUITE FILE_PATH="coverage/PGP$test.coverage" NAME="test Coverage Results" MODIFIED="1685032858390" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/PGP$keygen_gui.coverage" NAME="keygen_gui Coverage Results" MODIFIED="1685547383693" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/gui/keygen" />
     <SUITE FILE_PATH="coverage/PGP$msgsend.coverage" NAME="msgsend Coverage Results" MODIFIED="1685557988258" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/gui/msgsend" />
+=======
+    <SUITE FILE_PATH="coverage/PGP$keygen_gui.coverage" NAME="keygen_gui Coverage Results" MODIFIED="1685284517933" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/gui/keygen" />
+>>>>>>> 4d6fe45 (Smece neko)
     <SUITE FILE_PATH="coverage/PGP$app.coverage" NAME="app Coverage Results" MODIFIED="1685272848027" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
