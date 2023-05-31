@@ -1,8 +1,12 @@
 import tkinter as tk
-HEIGHT = 600
-WIDTH = 600
+from PIL import ImageTk, Image
+
+
+HEIGHT = 800
+WIDTH = 800
 BACKGROUND = "#e52a30"
-XYPOS = "+500+200"
+XYPOS = "+200+100"
 LABEL_FG = "white"
 LABEL_BG = "#a30e52"
+
 
