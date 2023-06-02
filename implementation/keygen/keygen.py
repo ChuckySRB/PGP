@@ -2,13 +2,16 @@ import implementation.configuration as config
 
 import cryptography.hazmat.primitives.asymmetric.rsa as rsa
 import cryptography.hazmat.primitives.asymmetric.dsa as dsa
-import Crypto.PublicKey.ElGamal as elgamal
+import lib.elgamal as elgamal
+#import Crypto.PublicKey.ElGamal as elgamal
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
+from cryptography.exceptions import InvalidSignature
+
 class KeyGenerator:
 
     @staticmethod
-    def generate_keys(name: str, email: str, algorithm: str, size: int):
+    def generate_keys(algorithm: str, size: int):
         if size != 1024 and size != 2048:
             print("Nedozvoljena velicina kljuca")
             return None
@@ -24,16 +27,19 @@ class KeyGenerator:
 
 
         elif algorithm == "DSA":
-            pass
+            private_key = dsa.generate_private_key(key_size = size)
+            public_key  = private_key.public_key()
         else:
-            pass
+            key_dict = elgamal.generate_keys(size, iConfidence= 5)
+            private_key = key_dict["private_key"]
+            public_key = key_dict["public_key"]
 
         return private_key, public_key
 
 if __name__ == "__main__":
-    private_key : rsa.RSAPrivateKey = None
-    public_key : rsa.RSAPublicKey = None
-    private_key, public_key = KeyGenerator.generate_keys("miki","mejl", "RSA", 1024)
+    private_key : elgamal.PrivateKey = None
+    public_key : elgamal.PublicKey = None
+    private_key, public_key = KeyGenerator.generate_keys("RSA", 1024)
 
     msg: str = "Hej, ja sam miki"
 
@@ -57,6 +63,35 @@ if __name__ == "__main__":
     print(plaintext)
     print(plaintext.decode('utf-8'))
 
+    private_key, public_key = KeyGenerator.generate_keys("DSA", 2048)
+
+    msg = "Hej ja nisam miki"
+    res_msg = bytes(msg, 'utf-8')
+    print(res_msg)
+
+    signature = private_key.sign(
+        data=res_msg,
+        algorithm=hashes.SHA1()
+    )
+
+    #ako je data prevelika, moze se hashovati odvojeno
+
+    try:
+        public_key.verify(signature=signature, data=res_msg, algorithm=hashes.SHA1())
+        print("Signature all cool!")
+    except InvalidSignature:
+        print("Signature not ok!")
 
 
+    private_key, public_key = KeyGenerator.generate_keys("ElGamal", 1024)
+
+    msg = "Opa, pa skoro sve radi"
+    # res_msg = bytes(msg, 'utf-8')
+
+    cipherText = elgamal.encrypt(public_key, msg)
+
+    print(cipherText)
+
+    decodedText = elgamal.decrypt(private_key, msg)
+    print(decodedText)
 
