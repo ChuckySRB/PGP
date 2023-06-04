@@ -2,6 +2,7 @@ import implementation.configuration as config
 
 import cryptography.hazmat.primitives.asymmetric.rsa as rsa
 import cryptography.hazmat.primitives.asymmetric.dsa as dsa
+import lib.myelgamal as elgamal
 #import Crypto.PublicKey.ElGamal as elgamal
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes, serialization
@@ -29,15 +30,14 @@ class KeyGenerator:
             private_key = dsa.generate_private_key(key_size = size)
             public_key  = private_key.public_key()
         else:
-            key_dict = elgamal.generate_keys(size, iConfidence= 5)
-            private_key = key_dict["private_key"]
-            public_key = key_dict["public_key"]
+            private_key = elgamal.Elgamal.generate_private_key(key_size= size)
+            public_key = private_key.public_key
 
         return private_key, public_key
 
 if __name__ == "__main__":
-    private_key : rsa.RSAPrivateKey = None
-    public_key : rsa.RSAPublicKey = None
+    private_key : elgamal.ElgamalPrivateKey = None
+    public_key : elgamal.ElgamalPublicKey = None
     private_key, public_key = KeyGenerator.generate_keys("RSA", 1024)
 
     msg: str = "Hej, ja sam miki"
@@ -45,12 +45,12 @@ if __name__ == "__main__":
     res_msg = bytes(msg, 'utf-8')
     print(res_msg)
 
-    print(str(hex(public_key.public_numbers().n)))
-    print(len(str(hex(public_key.public_numbers().n))))
-    print(public_key.public_bytes(encoding=serialization.Encoding.PEM,
-                                      format=serialization.PublicFormat.SubjectPublicKeyInfo))
+    # print(str(hex(public_key.public_numbers().n)))
+    # print(len(str(hex(public_key.public_numbers().n))))
+    # print(public_key.public_bytes(encoding=serialization.Encoding.PEM,
+    #                                   format=serialization.PublicFormat.SubjectPublicKeyInfo))
 
-    print(len(public_key.public_bytes(encoding= serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo)))
+    # print(len(public_key.public_bytes(encoding= serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo)))
 
 
     ciphertext = public_key.encrypt(res_msg,
@@ -90,15 +90,16 @@ if __name__ == "__main__":
         print("Signature not ok!")
 
 
-    # private_key, public_key = KeyGenerator.generate_keys("ElGamal", 1024)
-    #
-    # msg = "Opa, pa skoro sve radi"
-    # # res_msg = bytes(msg, 'utf-8')
-    #
-    # cipherText = elgamal.encrypt(public_key, msg)
-    #
-    # print(cipherText)
-    #
-    # decodedText = elgamal.decrypt(private_key, msg)
-    # print(decodedText)
+
+    private_key, public_key = KeyGenerator.generate_keys("ElGamal", 1024)
+    msg = "Opa, pa skoro sve radi"
+    res_msg = bytes(msg, 'utf-8')
+    print(res_msg)
+
+    ciphertext = public_key.encrypt(res_msg)
+
+
+    print(ciphertext)
+    decodedText = private_key.decrypt(ciphertext)
+    print(decodedText)
 

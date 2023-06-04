@@ -42,8 +42,8 @@ class ElgamalPrivateKey:
         c1: int = int.from_bytes(ciphertext[:self.size // 8], "big")
         K: int = pow(c1, self.Xa, self.q)
         Km1: int = self._compute_mod_inverse(K)
-        if(K * Km1 % self.q == 1):
-            print("Yea inverse!")
+        # if(K * Km1 % self.q == 1):
+        #     print("Yea inverse!")
         i : int = self.size // 8
         msg: bytes = b''
 
@@ -106,7 +106,7 @@ class ElgamalPublicKey:
     def encrypt(self, message: bytes)->bytes:
         k: int = self._calculate_one_time_k()
         K :int = pow(self.Ya, k, self.q)
-        "Nek bude isto k za svako parce poruke"
+        #Nek bude isto k za svako parce poruke
         message_list: list = self.split_message(message)
         c1: int = pow(self.a, k, self.q)
         ciphertext_list: list = list()
