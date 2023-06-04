@@ -2,10 +2,9 @@ import implementation.configuration as config
 
 import cryptography.hazmat.primitives.asymmetric.rsa as rsa
 import cryptography.hazmat.primitives.asymmetric.dsa as dsa
-import lib.elgamal as elgamal
 #import Crypto.PublicKey.ElGamal as elgamal
 from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.exceptions import InvalidSignature
 
 class KeyGenerator:
@@ -37,14 +36,22 @@ class KeyGenerator:
         return private_key, public_key
 
 if __name__ == "__main__":
-    private_key : elgamal.PrivateKey = None
-    public_key : elgamal.PublicKey = None
+    private_key : rsa.RSAPrivateKey = None
+    public_key : rsa.RSAPublicKey = None
     private_key, public_key = KeyGenerator.generate_keys("RSA", 1024)
 
     msg: str = "Hej, ja sam miki"
 
     res_msg = bytes(msg, 'utf-8')
     print(res_msg)
+
+    print(str(hex(public_key.public_numbers().n)))
+    print(len(str(hex(public_key.public_numbers().n))))
+    print(public_key.public_bytes(encoding=serialization.Encoding.PEM,
+                                      format=serialization.PublicFormat.SubjectPublicKeyInfo))
+
+    print(len(public_key.public_bytes(encoding= serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo)))
+
 
     ciphertext = public_key.encrypt(res_msg,
                        padding.OAEP(mgf = padding.MGF1(algorithm=hashes.SHA256()),
@@ -83,15 +90,15 @@ if __name__ == "__main__":
         print("Signature not ok!")
 
 
-    private_key, public_key = KeyGenerator.generate_keys("ElGamal", 1024)
-
-    msg = "Opa, pa skoro sve radi"
-    # res_msg = bytes(msg, 'utf-8')
-
-    cipherText = elgamal.encrypt(public_key, msg)
-
-    print(cipherText)
-
-    decodedText = elgamal.decrypt(private_key, msg)
-    print(decodedText)
+    # private_key, public_key = KeyGenerator.generate_keys("ElGamal", 1024)
+    #
+    # msg = "Opa, pa skoro sve radi"
+    # # res_msg = bytes(msg, 'utf-8')
+    #
+    # cipherText = elgamal.encrypt(public_key, msg)
+    #
+    # print(cipherText)
+    #
+    # decodedText = elgamal.decrypt(private_key, msg)
+    # print(decodedText)
 
