@@ -193,6 +193,50 @@ class RSAPrivateKeyWrapper(KeyWrapper):
     def verify(self, msg: bytes, signature: bytes) -> bool:
         raise UnsupportedKeyOperation
 
+class DSAPublicKeyWrapper(KeyWrapper):
+
+    def __init__(self, public_key: dsa.DSAPublicKey, key_size: int):
+        super().__init__()
+        self.key = public_key
+        self.size = key_size
+        self.id = self.key.public_numbers().y & ID_MASK
+
+    def get_parameters(self, password: str = None):
+        return {'y': self.key.public_numbers().y, 'p': self.key.public_numbers().parameter_numbers.p,
+                'q': self.key.public_numbers().parameter_numbers.q,
+                'g': self.key.public_numbers().parameter_numbers.g}
+
+    def is_private(self):
+        return False
+
+    def is_signature(self):
+        return True
+
+    def is_encryption(self):
+        return False
+
+    def get_algorithm(self):
+        return "DSA"
+
+    def encrypt(self, msg: bytes) -> bytes:
+        raise UnsupportedKeyOperation
+
+    def decrypt(self, msg: bytes, password: str) -> bytes:
+        raise UnsupportedKeyOperation
+
+    def sign(self, msg: bytes, password: str) -> bytes:
+        raise UnsupportedKeyOperation
+
+    def verify(self, msg: bytes, signature: bytes) -> bool:
+        try:
+            self.key.verify(
+                signature,
+                msg,
+                hashes.SHA256()
+            )
+        except InvalidSignature:
+            return False
+        return True
 
 if __name__ == "__main__":
 
@@ -217,3 +261,14 @@ if __name__ == "__main__":
 
     print("Cool") if rsa_public_wrapper.verify(msg, signature) else print("Not cool")
 
+    private_dsa: dsa.DSAPrivateKey = dsa.generate_private_key(2048)
+    public_dsa: dsa.DSAPublicKey = private_dsa.public_key()
+
+    dsa_public_key_wrapper: DSAPublicKeyWrapper = DSAPublicKeyWrapper(public_dsa, 2048)
+    print(dsa_public_key_wrapper.get_parameters())
+
+    signature = private_dsa.sign(msg, hashes.SHA256())
+
+
+
+    print("Cool") if dsa_public_key_wrapper.verify(msg, signature) else print("Not cool")
