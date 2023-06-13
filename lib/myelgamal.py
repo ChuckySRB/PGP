@@ -1,6 +1,7 @@
 from Crypto.Util.number import getPrime, getRandomInteger, getStrongPrime, getRandomRange
 import cryptography.hazmat.primitives.asymmetric.dsa as dsa
-
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+import base64
 
 def compute_mod_inverse(q, K):
     num1: int = q
@@ -79,6 +80,28 @@ class ElgamalPrivateKey:
         else:
             return coef2
 
+    def private_bytes(self, password: str) -> bytes:
+        first_line: bytes = b'-----BEGIN ENCRYPTED PRIVATE KEY-----\n'
+        last_line: bytes = b'\n-----END ENCRYPTED PRIVATE KEY-----\n'
+        content: bytes = self.size.to_bytes(16, 'big') + \
+                        self.q.to_bytes(self.size // 8, 'big') + \
+                        self.a.to_bytes(self.size // 8, 'big') + \
+                        self.Xa.to_bytes(self.size // 8, 'big')
+        iv: bytes = b'0' * 16
+        byte_password: bytes = password.encode(encoding='utf-8')
+        if len(byte_password) < 16:
+            byte_password = (16 - len(byte_password)) * b'0' + byte_password
+        else:
+            byte_password = byte_password[-16: -1]
+        cipher = Cipher(algorithms.AES(byte_password), modes.CBC(iv))
+        encryptor = cipher.encryptor()
+
+        ct: bytes = encryptor.update(content) + encryptor.finalize()
+        ct = base64.b64encode(ct)
+        return first_line + ct + last_line
+
+
+
 class ElgamalPublicKey:
 
     def __init__(self, q: int, a: int, Ya: int, size: int):
@@ -120,6 +143,7 @@ class ElgamalPublicKey:
         for msg in ciphertext_list:
             ciphertext += msg
         return ciphertext
+
 class Elgamal:
     @staticmethod
     def generate_private_key(key_size: int) -> ElgamalPrivateKey:
@@ -160,7 +184,32 @@ class Elgamal:
             exponent = exponent >> 1
         return result
 
+    @staticmethod
+    def load_pem_private_key(pem_key: bytes, password: str)->ElgamalPrivateKey:
+        first_line: bytes = b'-----BEGIN ENCRYPTED PRIVATE KEY-----\n'
+        last_line: bytes = b'\n-----END ENCRYPTED PRIVATE KEY-----\n'
+        beginning: int = len(first_line) - 1
+        ending: int = -len(last_line)
 
+        cipher_content: bytes = pem_key[beginning: ending]
+        cipher_content = base64.b64decode(cipher_content)
+        iv: bytes = b'0' * 16
+        byte_password: bytes = password.encode(encoding='utf-8')
+        if len(byte_password) < 16:
+            byte_password = (16 - len(byte_password)) * b'0' + byte_password
+        else:
+            byte_password = byte_password[-16: -1]
+        cipher = Cipher(algorithms.AES(byte_password), modes.CBC(iv))
+        decryptor = cipher.decryptor()
+
+        content: bytes = decryptor.update(cipher_content) + decryptor.finalize()
+        key_size: int = int.from_bytes(content[0:16], 'big')
+        q: int = int.from_bytes(content[16: 16 + key_size // 8], 'big')
+        a: int = int.from_bytes(content[16 + key_size // 8: 16 + 2*key_size // 8], 'big')
+        Xa: int = int.from_bytes(content[16 + 2*key_size // 8 :], 'big')
+
+
+        return ElgamalPrivateKey(q, a, Xa, key_size)
 
 if __name__ == "__main__":
 
@@ -188,3 +237,21 @@ if __name__ == "__main__":
     #     inv = compute_mod_inverse(1999, i)
     #     if(i*inv % 1999 != 1):
     #         print(f"Aaaaa {i}")
+
+    serialized_key: bytes = private_key.private_bytes("Sifra223")
+
+    private_key2 : ElgamalPrivateKey = Elgamal.load_pem_private_key(serialized_key, "Sifra223")
+    # print(private_key.a)
+    # print(private_key2.a)
+    # print(private_key.q)
+    # print(private_key2.q)
+    # print(private_key.size)
+    # print(private_key2.size)
+    # print(private_key.Xa)
+    # print(private_key2.Xa)
+
+    if private_key.a == private_key2.a and private_key.q == private_key2.q and \
+        private_key.size == private_key2.size and private_key.Xa == private_key2.Xa:
+        print("Cool")
+    else:
+        print("Not cool")

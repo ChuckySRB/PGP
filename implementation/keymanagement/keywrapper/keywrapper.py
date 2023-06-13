@@ -204,7 +204,9 @@ class DSAPublicKeyWrapper(KeyWrapper):
     def get_parameters(self, password: str = None):
         return {'y': self.key.public_numbers().y, 'p': self.key.public_numbers().parameter_numbers.p,
                 'q': self.key.public_numbers().parameter_numbers.q,
-                'g': self.key.public_numbers().parameter_numbers.g}
+                'g': self.key.public_numbers().parameter_numbers.g,
+                'id': self.id
+                }
 
     def is_private(self):
         return False
@@ -238,6 +240,150 @@ class DSAPublicKeyWrapper(KeyWrapper):
             return False
         return True
 
+class DSAPrivateKeyWrapper(KeyWrapper):
+
+    def __init__(self, private_key: dsa.DSAPrivateKey, size: int, password: str):
+        super().__init__()
+        self.size: int = size
+        self.hashed_password = hashlib.sha1(password.encode(encoding='utf-8'))
+        self.id: int = private_key.public_key().public_numbers().y & ID_MASK
+        self.serialized_key: bytes = private_key.private_bytes(
+            encoding= serialization.Encoding.PEM,
+            format= serialization.PrivateFormat.PKCS8,
+            encryption_algorithm= serialization.BestAvailableEncryption(bytes(password, 'utf-8'))
+        )
+
+    def _decrypt_private_key(self, password: str) -> dsa.DSAPrivateKey:
+        if self.hashed_password.hexdigest() != hashlib.sha1(password.encode('utf-8')).hexdigest():
+            raise IncorrectKeyPassword
+        private_key : dsa.DSAPrivateKey = serialization.load_pem_private_key(
+            self.serialized_key, password= (bytes(password, 'utf-8'))
+        )
+        return private_key
+
+    def get_parameters(self, password: str = None):
+        if password is None:
+            raise IncorrectKeyPassword
+        private_key: dsa.DSAPrivateKey = self._decrypt_private_key(password)
+        return {'x': private_key.private_numbers().x, 'id': self.id }
+
+    def is_private(self):
+        return True
+
+    def get_algorithm(self):
+        return "DSA"
+
+    def is_signature(self):
+        return True
+
+    def is_encryption(self):
+        return False
+
+    def decrypt(self, msg: bytes, password: str) -> bytes:
+        raise UnsupportedKeyOperation
+
+    def encrypt(self, msg: bytes) -> bytes:
+        raise UnsupportedKeyOperation
+
+    def sign(self, msg: bytes, password: str) -> bytes:
+        private_key: dsa.DSAPrivateKey = self._decrypt_private_key(password)
+
+        signature: bytes = private_key.sign(
+            msg,
+            hashes.SHA256()
+        )
+
+        return signature
+
+    def verify(self, msg: bytes, signature: bytes) -> bool:
+        raise UnsupportedKeyOperation
+
+class ElgamalPublicKeyWrapper(KeyWrapper):
+
+    def __init__(self, public_key: elgamal.ElgamalPublicKey, key_size):
+        super().__init__()
+        self.size: int = key_size
+        self.key: elgamal.ElgamalPublicKey = public_key
+        self.id = public_key.q & ID_MASK
+
+    def get_parameters(self, password: str = None):
+        return { 'q': self.key.q, 'a': self.key.a, 'Ya': self.key.Ya, 'id': self.id }
+
+    def is_private(self):
+        return False
+
+    def is_encryption(self):
+        return True
+
+    def is_signature(self):
+        return False
+
+    def get_algorithm(self):
+        return "Elgamal"
+
+    def encrypt(self, msg: bytes) -> bytes:
+        return self.key.encrypt(msg)
+
+    def decrypt(self, msg: bytes, password: str) -> bytes:
+        raise UnsupportedKeyOperation
+
+    def sign(self, msg: bytes, password: str) -> bytes:
+        raise UnsupportedKeyOperation
+
+    def verify(self, msg: bytes, signature: bytes) -> bool:
+        raise UnsupportedKeyOperation
+
+class ElgamalPrivateKeyWrapper(KeyWrapper):
+
+    def __init__(self, private_key: elgamal.ElgamalPrivateKey, size: int, password: str):
+        super().__init__()
+        self.size: int = size
+        self.hashed_password = hashlib.sha1(password.encode(encoding='utf-8'))
+        self.id = private_key.q & ID_MASK
+        self.serialized_key = private_key.private_bytes(password=password)
+        # print(self.serialized_key)
+
+    def _decrypt_private_key(self, password: str) -> elgamal.ElgamalPrivateKey:
+        if self.hashed_password.hexdigest() != hashlib.sha1(password.encode('utf-8')).hexdigest():
+            raise IncorrectKeyPassword
+
+        return elgamal.Elgamal.load_pem_private_key(self.serialized_key, password)
+
+    def get_parameters(self, password:str = None):
+        if password is None:
+            raise IncorrectKeyPassword
+
+        private_key: elgamal.ElgamalPrivateKey = self._decrypt_private_key(password)
+
+        return {'q': private_key.q, 'a': private_key.a, 'Xa': private_key.Xa, 'id': self.id }
+
+    def is_private(self):
+        return True
+
+    def is_signature(self):
+        return False
+
+    def is_encryption(self):
+        return True
+
+    def get_algorithm(self):
+        return "Elgamal"
+
+    def decrypt(self, msg: bytes, password: str) -> bytes:
+        private_key: elgamal.ElgamalPrivateKey = self._decrypt_private_key(password)
+
+        return private_key.decrypt(msg)
+
+    def encrypt(self, msg: bytes) -> bytes:
+        raise UnsupportedKeyOperation
+
+    def sign(self, msg: bytes, password: str) -> bytes:
+        raise UnsupportedKeyOperation
+
+    def verify(self, msg: bytes, signature: bytes) -> bool:
+        raise UnsupportedKeyOperation
+
+
 if __name__ == "__main__":
 
     private_rsa: rsa.RSAPrivateKey = rsa.generate_private_key(public_exponent=config.rsa_public_exponent ,key_size=1024)
@@ -265,10 +411,24 @@ if __name__ == "__main__":
     public_dsa: dsa.DSAPublicKey = private_dsa.public_key()
 
     dsa_public_key_wrapper: DSAPublicKeyWrapper = DSAPublicKeyWrapper(public_dsa, 2048)
+    dsa_private_key_wrapper: DSAPrivateKeyWrapper = DSAPrivateKeyWrapper(private_dsa, 2048, "Sifra123")
     print(dsa_public_key_wrapper.get_parameters())
+    print(dsa_private_key_wrapper.get_parameters("Sifra123"))
 
-    signature = private_dsa.sign(msg, hashes.SHA256())
+    signature = dsa_private_key_wrapper.sign(msg, "Sifra123")
 
 
 
     print("Cool") if dsa_public_key_wrapper.verify(msg, signature) else print("Not cool")
+
+    private_elgamal : elgamal.ElgamalPrivateKey = elgamal.Elgamal.generate_private_key(2048)
+    public_elgamal : elgamal.ElgamalPublicKey = private_elgamal.public_key
+
+    elgamal_private_key_wrapper : ElgamalPrivateKeyWrapper = ElgamalPrivateKeyWrapper(private_elgamal, 2048, "Sifra334")
+    elgamal_public_key_wrapper : ElgamalPublicKeyWrapper = ElgamalPublicKeyWrapper(public_elgamal, 2048)
+    print(elgamal_public_key_wrapper.get_parameters())
+    print(elgamal_private_key_wrapper.get_parameters("Sifra334"))
+
+    cipher = elgamal_public_key_wrapper.encrypt(msg)
+
+    print("Cool") if elgamal_private_key_wrapper.decrypt(cipher, "Sifra334") == msg else print("Not cool")

@@ -35,7 +35,7 @@ class KeyGenGui(tk.Tk):
                                    background=gui.configuration.LABEL_BG)
         label_algorithm.grid(column = 0, columnspan = 2, row = 2, padx = 5, pady = 5)
 
-        algorithms = ['RSA', 'DSA', 'ElGamal']
+        algorithms = ['RSA', 'DSA', 'Elgamal']
         self.algorithm = tk.StringVar()
         self.algorithm.set('RSA')
         optionMenu = tk.OptionMenu(self, self.algorithm, *algorithms)
