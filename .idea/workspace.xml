@@ -2,10 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1be4e137-fb53-44f0-9458-527335f0fae1" name="Changes" comment="">
+<<<<<<< HEAD
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+=======
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gui/keygen/keygen.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/keygen/keygen.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/implementation/keymanagement/keywrapper/keywrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/implementation/keymanagement/keywrapper/keywrapper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/myelgamal.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/myelgamal.py" afterDir="false" />
+>>>>>>> e0548a959d2debf83c093fcb459f5b4222d176b2
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,12 +41,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
+<<<<<<< HEAD
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Caslav/Poso/Alas/Alas&quot;
+=======
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
     "last_opened_file_path": "C:/Users/lulel/Faks/8mi semestar/ZP/PGP/lib/myelgamal.py"
+>>>>>>> e0548a959d2debf83c093fcb459f5b4222d176b2
   }
 }]]></component>
   <component name="RecentsManager">
@@ -237,11 +251,17 @@
       <workItem from="1685119771880" duration="1653000" />
       <workItem from="1685171278879" duration="4298000" />
       <workItem from="1685271783850" duration="4341000" />
+<<<<<<< HEAD
+      <workItem from="1685637034294" duration="1612000" />
+      <workItem from="1686605018240" duration="498000" />
+      <workItem from="1687019362473" duration="1200000" />
+=======
       <workItem from="1685282258218" duration="1446000" />
       <workItem from="1685306552368" duration="33000" />
       <workItem from="1686080806291" duration="5440000" />
       <workItem from="1686114456242" duration="5658000" />
       <workItem from="1686674566720" duration="8412000" />
+>>>>>>> e0548a959d2debf83c093fcb459f5b4222d176b2
     </task>
     <servers />
   </component>
