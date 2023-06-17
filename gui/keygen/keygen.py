@@ -35,7 +35,7 @@ class KeyGenGui(tk.Tk):
                                    background=gui.configuration.LABEL_BG)
         label_algorithm.grid(column = 0, columnspan = 2, row = 2, padx = 5, pady = 5)
 
-        algorithms = ['RSA', 'DSA', 'ElGamal']
+        algorithms = ['RSA', 'DSA', 'Elgamal']
         self.algorithm = tk.StringVar()
         self.algorithm.set('RSA')
         optionMenu = tk.OptionMenu(self, self.algorithm, *algorithms)
@@ -43,7 +43,7 @@ class KeyGenGui(tk.Tk):
 
     def _init_key_sizes(self):
         label_key_size = tk.Label(self ,text="Key size", fg = gui.configuration.LABEL_FG,
-                                  background= gui.configuration.BACKGROUND)
+                                  background= gui.configuration.LABEL_BG)
         label_key_size.grid(column = 0, columnspan= 2, row = 3, padx = 5, pady = 5)
 
         key_sizes = ["1024", "2048"]
