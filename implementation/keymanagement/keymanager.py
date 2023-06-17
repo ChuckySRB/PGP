@@ -28,6 +28,18 @@ class KeyManager:
         self.email: str = email
         self.key_dict: dict = {}
 
+    @staticmethod
+    def get_public_key(email):
+        if email in KeyManager.KEY_MANAGER_DICT:
+            keys = KeyManager.KEY_MANAGER_DICT[email].key_dict
+            if len(keys) == 0:
+                return [None, "The user has no public keys!"]
+            return [list(keys.values())[0][1], "Key sent"]
+
+        return [None, "Provided E-Mail does not exist!"]
+
+
+
     def gen_keys(self, key_size: int, algorithm: str, password: str):
         unique: bool = False
         private_key_wrapper: KeyWrapper = None
@@ -56,6 +68,12 @@ if __name__ == "__main__":
     print(msg2)
     print(msg3)
 
+    first.gen_keys(1024, "rsa", "123")
+
+    key, message = KeyManager.get_public_key("mika@gmail.com")
+
+    print(message)
+    print(key)
     print(len(KeyManager.KEY_MANAGER_DICT))
 
 
