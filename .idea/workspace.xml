@@ -3,9 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="1be4e137-fb53-44f0-9458-527335f0fae1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gui/keygen/keygen.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/keygen/keygen.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/util.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/implementation/keymanagement/keymanager.py" beforeDir="false" afterPath="$PROJECT_DIR$/implementation/keymanagement/keymanager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/implementation/keymanagement/keywrapper/keywrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/implementation/keymanagement/keywrapper/keywrapper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/myelgamal.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/myelgamal.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,7 +44,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "C:/Users/lulel/Faks/8mi semestar/ZP/PGP/lib/myelgamal.py"
+    "last_opened_file_path": "C:/Users/lulel/Faks/8mi semestar/ZP/PGP/gui/controller.py"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -55,7 +58,7 @@
       <recent name="D:\Caslav\Fakultet\ZP - Zaštita Podataka\Projekat\PGP\gui\msgsend" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.keywrapper">
+  <component name="RunManager" selected="Python.controller_gui">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python">
       <module name="PGP" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -70,6 +73,28 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="controller_gui" type="PythonConfigurationType" factoryName="Python">
+      <module name="PGP" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\lulel\Faks\8mi semestar\ZP\PGP\venv\Scripts\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/gui" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/gui/controller.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -213,6 +238,7 @@
     <list>
       <item itemvalue="Python.app" />
       <item itemvalue="Python.keygen_gui" />
+      <item itemvalue="Python.controller_gui" />
       <item itemvalue="Python.test" />
       <item itemvalue="Python.keymanager" />
       <item itemvalue="Python.keywrapper" />
@@ -241,7 +267,9 @@
       <workItem from="1685306552368" duration="33000" />
       <workItem from="1686080806291" duration="5440000" />
       <workItem from="1686114456242" duration="5658000" />
-      <workItem from="1686674566720" duration="8412000" />
+      <workItem from="1686674566720" duration="9004000" />
+      <workItem from="1686984708658" duration="81000" />
+      <workItem from="1687017326521" duration="5880000" />
     </task>
     <servers />
   </component>
@@ -261,11 +289,12 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/PGP$keymanager.coverage" NAME="keymanager Coverage Results" MODIFIED="1686082874534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/implementation/keygen" />
-    <SUITE FILE_PATH="coverage/PGP$keygen_gui.coverage" NAME="keygen_gui Coverage Results" MODIFIED="1685547383693" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/gui/keygen" />
+    <SUITE FILE_PATH="coverage/PGP$keygen_gui.coverage" NAME="keygen_gui Coverage Results" MODIFIED="1687019826772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/gui/keygen" />
     <SUITE FILE_PATH="coverage/PGP$msgsend.coverage" NAME="msgsend Coverage Results" MODIFIED="1686080841125" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/gui/msgsend" />
-    <SUITE FILE_PATH="coverage/PGP$app.coverage" NAME="app Coverage Results" MODIFIED="1685272848027" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/PGP$app.coverage" NAME="app Coverage Results" MODIFIED="1687018719929" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/PGP$controller_gui.coverage" NAME="controller_gui Coverage Results" MODIFIED="1687024522740" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/gui" />
     <SUITE FILE_PATH="coverage/PGP$keywrapper.coverage" NAME="keywrapper Coverage Results" MODIFIED="1686686342039" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/implementation/keymanagement/keywrapper" />
-    <SUITE FILE_PATH="coverage/PGP$test.coverage" NAME="test Coverage Results" MODIFIED="1685032858390" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/PGP$test.coverage" NAME="test Coverage Results" MODIFIED="1687020174380" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/PGP$elgamal.coverage" NAME="elgamal Coverage Results" MODIFIED="1686686321495" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/lib" />
   </component>
 </project>

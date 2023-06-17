@@ -7,7 +7,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
 from implementation.keygen.keygen import KeyGenerator
 import lib.myelgamal as elgamal
-
+from implementation.keymanagement.keywrapper.keywrapper import KeyWrapper
 
 #Vidi posle kako ces sa greskom
 class KeyManager:
@@ -26,11 +26,24 @@ class KeyManager:
     def __init__(self, name: str, email: str):
         self.name: str = name
         self.email: str = email
-        self.key_list: list = []
+        self.key_dict: dict = {}
 
-    def gen_keys(self, key_size: int, algorithm: str):
+    def gen_keys(self, key_size: int, algorithm: str, password: str):
+        unique: bool = False
+        private_key_wrapper: KeyWrapper = None
+        public_key_wrapper: KeyWrapper = None
+        while not unique:
+            private_key, public_key = KeyGenerator.generate_keys(algorithm, key_size)
 
-        KeyGenerator.generate_keys(algorithm, key_size)
+            private_key_wrapper, public_key_wrapper = KeyWrapper.generate_keys(algorithm, key_size, password, private_key, public_key)
+            if public_key_wrapper.get_parameters()["id"] not in self.key_dict.keys():
+                unique = True
+        self.key_dict[public_key_wrapper.get_parameters()["id"]] = (private_key_wrapper, public_key_wrapper)
+
+    def get_keys(self):
+        return self.key_dict
+
+
 
 
 if __name__ == "__main__":

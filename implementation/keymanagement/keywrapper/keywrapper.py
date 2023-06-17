@@ -22,6 +22,15 @@ class IncorrectKeyPassword(Exception):
 
 class KeyWrapper(ABC):
 
+    @staticmethod
+    def generate_keys(algorithm: str, key_size: int, password: str, private_key, public_key):
+        if algorithm == "RSA":
+            return RSAPrivateKeyWrapper(private_key, key_size, password),RSAPublicKeyWrapper(public_key, key_size)
+        elif algorithm == "DSA":
+            return DSAPrivateKeyWrapper(private_key, key_size, password), DSAPublicKeyWrapper(public_key, key_size)
+        else:
+            return ElgamalPrivateKeyWrapper(private_key, key_size, password), ElgamalPublicKeyWrapper(public_key, key_size)
+
     @abstractmethod
     def get_parameters(self, password: str = None):
         pass
