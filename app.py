@@ -3,7 +3,7 @@ from PIL import ImageTk, Image
 
 
 HEIGHT = 600 #prevelik mi je za laps 800
-WIDTH = 600
+WIDTH = 800
 if __name__ == "__main__":
 
     # Prozor na kome se pravi sve

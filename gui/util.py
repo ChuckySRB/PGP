@@ -2,13 +2,13 @@ import tkinter as tk
 import gui.configuration
 from PIL import ImageTk, Image
 
-def init_window(window: tk.Tk, title: str):
+def init_window(window: tk.Tk, title: str, imagePath: str):
     window.title(title)
     window.geometry(f"{gui.configuration.WIDTH}x{gui.configuration.HEIGHT}")
     window.geometry(gui.configuration.XYPOS)
     window.configure(bg=gui.configuration.BACKGROUND)
     try:
-        image = Image.open("../../asets/neoncity.png")
+        image = Image.open(imagePath)
         image = image.resize((gui.configuration.WIDTH, gui.configuration.HEIGHT), Image.LANCZOS)
         window.background_image = ImageTk.PhotoImage(image)
         canvas = tk.Canvas(window, width=gui.configuration.WIDTH, height=gui.configuration.HEIGHT)
