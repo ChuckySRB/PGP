@@ -2,7 +2,7 @@ import tkinter as tk
 import gui.configuration
 from PIL import ImageTk, Image
 
-def init_window(window: tk.Tk, title: str, imagePath: str):
+def init_window(window: tk.Toplevel, title: str, imagePath: str):
     window.title(title)
     window.geometry(f"{gui.configuration.WIDTH}x{gui.configuration.HEIGHT}")
     window.geometry(gui.configuration.XYPOS)
