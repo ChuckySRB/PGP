@@ -126,6 +126,19 @@ class ElgamalPublicKey:
 
         return message_list
 
+    def public_bytes(self, *args, **kwargs):
+        ct: bytes = b''
+        first_line: bytes = b'-----BEGIN PUBLIC KEY-----\n'
+        last_line: bytes = b'\n-----END PUBLIC KEY-----\n'
+        ct += self.size.to_bytes(16, 'big') + \
+                self.q.to_bytes(self.size // 8, 'big') + \
+                self.a.to_bytes(self.size // 8, 'big') + \
+                self.Ya.to_bytes(self.size // 8, 'big')
+
+        ct = base64.b64encode(ct)
+        return first_line + ct + last_line
+
+
     def encrypt(self, message: bytes)->bytes:
         k: int = self._calculate_one_time_k()
         K :int = pow(self.Ya, k, self.q)
@@ -188,7 +201,7 @@ class Elgamal:
     def load_pem_private_key(pem_key: bytes, password: str)->ElgamalPrivateKey:
         first_line: bytes = b'-----BEGIN ENCRYPTED PRIVATE KEY-----\n'
         last_line: bytes = b'\n-----END ENCRYPTED PRIVATE KEY-----\n'
-        beginning: int = len(first_line) - 1
+        beginning: int = len(first_line)
         ending: int = -len(last_line)
 
         cipher_content: bytes = pem_key[beginning: ending]
@@ -210,6 +223,25 @@ class Elgamal:
 
 
         return ElgamalPrivateKey(q, a, Xa, key_size)
+
+    @staticmethod
+    def load_pem_public_key(pem_key: bytes):
+        pem_key.strip(b'\n')
+        pem_list: list = pem_key.splitlines()
+
+        pem_list.remove(pem_list[0])
+        pem_list.remove(pem_list[-1])
+        ct = b'\n'.join(pem_list)
+
+        ct = base64.b64decode(ct)
+
+        key_size: int =  int.from_bytes(ct[0 : 16], 'big')
+        q: int = int.from_bytes(ct[16: 16 + key_size // 8], 'big')
+        a: int = int.from_bytes(ct[16 + key_size // 8: 16 + 2 * key_size // 8], 'big')
+        Ya: int = int.from_bytes(ct[16 + 2 * key_size // 8:], 'big')
+
+        return ElgamalPublicKey(q, a, Ya, key_size)
+
 
 if __name__ == "__main__":
 
@@ -255,3 +287,10 @@ if __name__ == "__main__":
         print("Cool")
     else:
         print("Not cool")
+
+    public_bytes: bytes = private_key.public_key.public_bytes()
+
+    print("Cool") if Elgamal.load_pem_public_key(public_bytes).Ya == private_key.public_key.Ya \
+        and Elgamal.load_pem_public_key(public_bytes).q == private_key.public_key.q \
+        and Elgamal.load_pem_public_key(public_bytes).a == private_key.public_key.a \
+        else print("Not cool")

@@ -101,6 +101,7 @@ class KeyViewGui(tk.Toplevel):
             self.text.insert(tk.END, "id: " + hex(key_to_keys) + "\n")
 
             if key_dict[key_to_keys][1] != None:
+                self.text.insert(tk.END, "\t" + key_dict[key_to_keys][1].get_algorithm() + "\n")
                 text_to_display: str = "\tpub_key:\n"
                 param_dict: dict = key_dict[key_to_keys][1].get_parameters()
                 for param_key in param_dict:
@@ -119,6 +120,7 @@ class KeyViewGui(tk.Toplevel):
             if key_dict[key_to_keys][0] != None:
                 self.text.insert(tk.END, "\t\t")
                 self.text.window_create(self.text.index("end"), window = tk.Button(self.text, text = "See private key", command= lambda: self._see_private_key(key_dict[key_to_keys][1])))
+                self.text.insert(tk.END, "\n")
 
     def _see_private_key(self, private_key_wrapper: KeyWrapper):
         show_private_key_modal: PrivateKeyShowModal = PrivateKeyShowModal(self, private_key_wrapper)
