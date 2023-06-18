@@ -21,7 +21,50 @@ class IncorrectKeyPassword(Exception):
     pass
 
 class KeyWrapper(ABC):
+    key = None
+    size = 0
+    # @abstractmethod
+    def export_key(self, file_location: str, email: str, password:str = None):
+        if not self.is_private():
+            pem: bytes = self.key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo
+            )
+            pem_list: list = pem.splitlines()
+            pem_list.insert(1, (email + " " + self.get_algorithm() + " " + str(self.size)).encode("utf-8"))
+            pem = b'\n'.join(pem_list)
 
+            with open(file_location, "wb") as f:
+                f.write(pem)
+
+    @staticmethod
+    def import_key(file_location: str, password: str = None):
+        file = open(file_location, "rb")
+        pem: bytes = file.read()
+        file.close()
+        pem_list: list = pem.splitlines()
+        info_line_splitted = pem_list[1].decode("utf-8").split(" ")
+        email: str = info_line_splitted[0]
+        algorithm: str = info_line_splitted[1]
+        size: int = int(info_line_splitted[2])
+        pem_list.remove(pem_list[1])
+        pem = b'\n'.join(pem_list)
+
+
+        if algorithm == "RSA" and b'PUBLIC' in pem_list[0]:
+            rsa_public_key: rsa.RSAPublicKey = serialization.load_pem_public_key(pem)
+            rsa_key_wrapper: RSAPublicKeyWrapper = RSAPublicKeyWrapper(rsa_public_key, size)
+            return email, algorithm, size, rsa_key_wrapper
+        elif algorithm == "DSA" and b'PUBLIC' in pem_list[0]:
+            dsa_public_key: dsa.DSAPublicKey = serialization.load_pem_public_key(pem)
+            dsa_key_wrapper: DSAPublicKeyWrapper = DSAPublicKeyWrapper(dsa_public_key, size)
+            return email, algorithm, size, dsa_key_wrapper
+        elif algorithm == "Elgamal" and b'PUBLIC' in pem_list[0]:
+            elgamal_public_key: elgamal.ElgamalPublicKey = elgamal.Elgamal.load_pem_public_key(pem)
+            elgamal_key_wrapper: ElgamalPublicKeyWrapper = ElgamalPublicKeyWrapper(elgamal_public_key, size)
+            return email, algorithm, size, elgamal_key_wrapper
+
+        return None, None, None, None
     @staticmethod
     def generate_keys(algorithm: str, key_size: int, password: str, private_key, public_key):
         if algorithm == "RSA":
@@ -74,6 +117,9 @@ class RSAPublicKeyWrapper(KeyWrapper):
         self.size: int = key_size
         self.key: rsa.RSAPublicKey = public_key
         self.id: int = public_key.public_numbers().n & ID_MASK
+
+
+
 
     def get_parameters(self, password: str = None):
         return {'e': self.key.public_numbers().e, 'n': self.key.public_numbers().n, 'id': self.id}
@@ -441,3 +487,11 @@ if __name__ == "__main__":
     cipher = elgamal_public_key_wrapper.encrypt(msg)
 
     print("Cool") if elgamal_private_key_wrapper.decrypt(cipher, "Sifra334") == msg else print("Not cool")
+
+    rsa_public_wrapper.export_key("rsa_pub_key.pem", "j@j")
+    dsa_public_key_wrapper.export_key("dsa_pub_key.pem", "a@a")
+    elgamal_public_key_wrapper.export_key("elgamal_pub_key.pem", "k@k")
+
+    print("Cool") if rsa_public_wrapper.key.public_numbers().n == KeyWrapper.import_key("rsa_pub_key.pem")[3].key.public_numbers().n else print("Not cool")
+    print("Cool") if dsa_public_key_wrapper.key.public_numbers().y == KeyWrapper.import_key("dsa_pub_key.pem")[3].key.public_numbers().y else print("Not cool")
+    print("Cool") if elgamal_public_key_wrapper.key.Ya == KeyWrapper.import_key("elgamal_pub_key.pem")[3].key.Ya else print("Not cool")
