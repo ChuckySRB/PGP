@@ -1,10 +1,10 @@
 from implementation.keymanagement.keymanager import *
 
 
-class MessageEncryption:
+class MessageManager:
 
     @staticmethod
-    def encrypt(path, email, private_key, public_key, authentification, privacy_algorthm, ZIP, RADIX):
+    def send(path, email, private_key, public_key, authentification, privacy_algorthm, ZIP, RADIX):
         km, msg = KeyManager.get_key_manager("mika", "mika@gmail.com")
         if not km:
             print(msg)
@@ -22,3 +22,6 @@ class MessageEncryption:
         file.write("-----END PUBLIC KEy-----\n")
         file.close()
         print("Message sent!")
+
+    def read(self):
+        pass

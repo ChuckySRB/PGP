@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 import gui.configuration
 import gui.util
-from implementation.msgsend.msgencryption import *
+from implementation.message.messagemanager import *
 
 from PIL import ImageTk, Image
 
@@ -118,7 +118,7 @@ class MessageSend(tk.Tk):
 
 
     def _init_button(self):
-        send_msg = tk.Button(self, text = "Send Message", command= lambda : MessageEncryption.encrypt(self.path.get(),
+        send_msg = tk.Button(self, text = "Send Message", command= lambda : MessageManager.send(self.path.get(),
                                                                                                       self.email.get(), self.private_key,
                                                                                                       self.public_key, self.auth, self.algorithm,
                                                                                                       self.zip, self.radix))
