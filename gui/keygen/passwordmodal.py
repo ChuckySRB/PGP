@@ -60,7 +60,10 @@ class PrivateKeyShowModal(tk.Toplevel):
     def submit_password(self):
         self.text.delete("1.0", "end")
         password_str = self.password.get()
+<<<<<<< HEAD
         self.text.insert(tk.END, self.private_key_wrapper.get_algorithm() + "\n")
+=======
+>>>>>>> 9e4c3c2b438d2986c31b9d7b27c34dc19243674a
         try:
             text_to_display: str = ""
             parameter_dict: dict = self.private_key_wrapper.get_parameters(password_str)
