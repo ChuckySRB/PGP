@@ -3,8 +3,9 @@ import gui.configuration
 import gui.util
 from implementation.keymanagement.keymanager import KeyManager
 import re
-from gui.keygen.passwordmodal import PasswordModal
+from gui.keygen.passwordmodal import PasswordModal, PrivateKeyShowModal
 from gui.controller import GuiController
+from implementation.keymanagement.keywrapper.keywrapper import  KeyWrapper
 
 class KeyViewGui(tk.Toplevel):
     def __init__(self, image_path: str):
@@ -60,9 +61,6 @@ class KeyViewGui(tk.Toplevel):
         entry_email.grid(column=2, columnspan=2, row=1, padx=5, pady=5)
 
     def _init_message_label(self):
-        # self.message_label = tk.Label(self, text="", fg=gui.configuration.LABEL_FG,
-        #                               background=gui.configuration.LABEL_BG)
-        # self.message_label.grid(column=0, columnspan=2, row=3, padx=5, pady=5)
         pass
 
     def _init_scrollbar(self):
@@ -79,6 +77,7 @@ class KeyViewGui(tk.Toplevel):
         button_show.grid(column= 0, columnspan= 2, row = 2, padx = 5, pady = 5)
 
     def _show_keys(self, name: str, email: str):
+        self.text.delete("1.0", "end")
         if re.search(".+@.+", email) is None:
             message: str = "Email not valid"
             self.text.insert(tk.END, message)
@@ -97,16 +96,9 @@ class KeyViewGui(tk.Toplevel):
 
         key_dict: dict = key_manager.get_keys()
         if len(key_dict.keys()) == 0:
-            self.message_label.config(text = "No keys to display")
-        i : int = 0
+            self.text.insert(tk.END, "No keys to display")
         for key_to_keys in key_dict:
-
-            # label = tk.Label(self.added_frame, text= "id: " + hex(key_to_keys),  fg=gui.configuration.LABEL_FG,
-            #                           background=gui.configuration.LABEL_BG, justify="left", anchor="w")
-            # label.pack(anchor="w", padx=5, pady=5)
-            # self.added_widgets.append(label)
             self.text.insert(tk.END, "id: " + hex(key_to_keys) + "\n")
-            i += 1
 
             if key_dict[key_to_keys][1] != None:
                 text_to_display: str = "\tpub_key:\n"
@@ -122,11 +114,12 @@ class KeyViewGui(tk.Toplevel):
                         j = boundary
                         text_to_display += temp_text
                         temp_text = "\t\t"
-                # label = tk.Label(self.added_frame, text= text_to_display,  fg=gui.configuration.LABEL_FG,
-                #                       background=gui.configuration.LABEL_BG, justify="left", anchor="w")
-                # label.pack(anchor="w", pady=5, padx=5)
-                # label.grid(row= 3 + i, rowspan = 1, columnspan= 6, padx=5, pady= 5)
-                # self.added_widgets.append(label)
-                # label.grid(row=3 + i, rowspan=1, columnspan= 6, padx=5, pady=5)
+
                 self.text.insert(tk.END, text_to_display)
-                i += 1
+            if key_dict[key_to_keys][0] != None:
+                self.text.insert(tk.END, "\t\t")
+                self.text.window_create(self.text.index("end"), window = tk.Button(self.text, text = "See private key", command= lambda: self._see_private_key(key_dict[key_to_keys][1])))
+
+    def _see_private_key(self, private_key_wrapper: KeyWrapper):
+        show_private_key_modal: PrivateKeyShowModal = PrivateKeyShowModal(self, private_key_wrapper)
+        self.wait_window(show_private_key_modal)
