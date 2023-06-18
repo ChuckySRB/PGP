@@ -3,11 +3,15 @@ import gui.configuration
 import gui.util
 from implementation.keymanagement.keymanager import KeyManager
 import re
+from gui.keygen.passwordmodal import PasswordModal
+from gui.controller import GuiController
+from gui.keygen.keyview import KeyViewGui
 
-class KeyGenGui(tk.Tk):
+class KeyGenGui(tk.Toplevel):
     def __init__(self, image_path: str):
         super().__init__()
         gui.util.init_window(self, "Key generation", image_path)
+        self._init_menu()
         self._init_name()
         self._init_email()
         self._init_algorithms()
@@ -15,6 +19,14 @@ class KeyGenGui(tk.Tk):
         self._init_button()
         self._init_message_label()
 
+    def _init_menu(self):
+        menubar = tk.Menu(self)
+        self.config(menu=menubar)
+
+        menubar.add_command(
+            label = "Key View",
+            command = lambda: GuiController.switch_window("keyview")
+        )
 
     def _init_name(self):
         label_name = tk.Label(self, text="Name", fg=gui.configuration.LABEL_FG,
@@ -63,7 +75,7 @@ class KeyGenGui(tk.Tk):
             self.algorithm.get(),
             int(self.key_size.get())
         ))
-        button_keygen.grid(column= 0, columnspan= 4, row = 4, padx = 5, pady = 5)
+        button_keygen.grid(column= 0, columnspan= 2, row = 4, padx = 5, pady = 5)
 
     def _init_message_label(self):
         self.message_label = tk.Label(self, text="", fg = gui.configuration.LABEL_FG,
@@ -97,30 +109,15 @@ class KeyGenGui(tk.Tk):
 
         self.message_label.config(text=message)
 
-class PasswordModal(tk.Toplevel):
-
-    def __init__(self, key_gen_window):
-        super().__init__(key_gen_window)
-        self.toplevel = key_gen_window
-        self.title("Password")
-        self.geometry("300x150")
-        self.config(bg="white")
-        label = tk.Label(self, text = "Enter password for private key")
-        label.grid(column = 0, columnspan= 2, row = 0, padx = 5, pady = 5)
-
-        self.password = tk.Variable()
-        entry_password = tk.Entry(self, show = "*", textvariable=self.password)
-        entry_password.grid(column = 0, columnspan= 2, row = 1, padx= 5, pady= 5)
-
-        submit_button = tk.Button(self, text="Submit", command= lambda: self.submit_password())
-        submit_button.grid(column= 0, columnspan= 2, row = 2, padx= 5, pady= 5)
-
-    def submit_password(self):
-        self.toplevel.password = self.password.get()
-        self.destroy()
+    def reset(self):
+        pass
 
 #Test for gui
 if __name__ == "__main__":
 
     window_keygen = KeyGenGui("../../asets/neoncity.png")
+    GuiController.WINDOWS["keygen"] = window_keygen
+    GuiController.CURRENTLY_RUNNING = window_keygen
+    GuiController.WINDOWS["keyview"] = KeyViewGui("../../asets/neoncity.png")
+    GuiController.WINDOWS["keyview"].withdraw()
     window_keygen.mainloop()
