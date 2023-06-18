@@ -2,14 +2,14 @@ import tkinter as tk
 from tkinter import filedialog
 import gui.configuration
 import gui.util
-from implementation.msgsend.msgencryption import *
+from implementation.message.messagemanager import *
 
 from PIL import ImageTk, Image
 
 class MessageSend(tk.Tk):
     def __init__(self):
         super().__init__()
-        gui.util.init_window(self, "Message Send")
+        gui.util.init_window(self, "Message Send", "../../asets/neoncity.png")
         self._init_title()
         self._init_message()
         self._init_email()
@@ -41,7 +41,7 @@ class MessageSend(tk.Tk):
         label_msg.grid(column=0, columnspan=1, row=7, padx=5, pady=5)
 
         self.email = tk.Variable()
-        entry_msg = tk.Entry(self, width=40)
+        entry_msg = tk.Entry(self, width=40, textvariable=self.email)
         entry_msg.grid(column=1, columnspan=2, row=7, padx=20, pady=5)
 
     def _init_encryption(self):
@@ -108,7 +108,8 @@ class MessageSend(tk.Tk):
         label_dest = tk.Label(self, text="Destination", fg=gui.configuration.LABEL_FG,
                              background=gui.configuration.LABEL_BG)
         label_dest.grid(column=2, columnspan=2, row=6, padx=5, pady=5)
-        self.destination_folder_entry = tk.Entry(self, width=40)
+        self.path = tk.Variable()
+        self.destination_folder_entry = tk.Entry(self, width=40, textvariable=self.path)
         self.destination_folder_entry.grid(column=4, columnspan=2, row=6, padx=5, pady=5)
 
         # Button to open file dialog and choose destination folder
@@ -117,7 +118,10 @@ class MessageSend(tk.Tk):
 
 
     def _init_button(self):
-        send_msg = tk.Button(self, text = "Send Message", command= lambda : MessageEncryption.encrypt(self.email, self.private_key, self.public_key, self.auth, self.algorithm, self.zip, self.radix))
+        send_msg = tk.Button(self, text = "Send Message", command= lambda : MessageManager.send(self.path.get(),
+                                                                                                      self.email.get(), self.private_key,
+                                                                                                      self.public_key, self.auth, self.algorithm,
+                                                                                                      self.zip, self.radix))
         send_msg.grid(column=6, columnspan=2, row=10, padx=5, pady=5)
 
 # Test for gui
