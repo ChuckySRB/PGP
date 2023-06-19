@@ -5,7 +5,8 @@ import hashlib
 import io
 import zipfile
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-#from cryptography.hazmat.primitives import padding
+from cryptography.hazmat.primitives import padding
+from cryptography.hazmat.primitives.padding import PKCS7
 from cryptography.hazmat.backends import default_backend
 import os
 from implementation.keymanagement.keymanager import *
@@ -97,7 +98,9 @@ class MessageEncryptor():
             print("No Encryption")
             return None
         encryptor = cipher.encryptor()
-        encrypthed_message = encryptor.update(self.message) + encryptor.finalize()
+        aes_padding = PKCS7(algorithms.AES.block_size).padder()
+        padded_data = aes_padding.update(self.message) + aes_padding.finalize()
+        encrypthed_message = encryptor.update(padded_data) + encryptor.finalize()
 
 
         encrypthed_session_key = self.reciever_key.encrypt(session_key)

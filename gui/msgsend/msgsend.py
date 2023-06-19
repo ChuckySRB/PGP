@@ -83,7 +83,6 @@ class MessageSend(tk.Tk):
         private_keys = []
         manager = KeyManager.get_manager(self.user)
         for key in list(manager.key_dict.values()):
-
             if key[0].is_signature():
                 private_keys.append(key[0].id)
 
