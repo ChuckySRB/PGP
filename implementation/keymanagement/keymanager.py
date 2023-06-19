@@ -59,10 +59,10 @@ class KeyManager:
                 unique = True
         self.key_dict[public_key_wrapper.get_parameters()["id"]] = (private_key_wrapper, public_key_wrapper)
 
-    def get_public_key_withID(self, key_ID):
+    def get_keys_withID(self, key_ID):
         if key_ID not in self.key_dict:
             return None
-        return self.key_dict[key_ID][1]
+        return self.key_dict[key_ID]
 
     def get_keys(self):
         return self.key_dict

@@ -42,66 +42,67 @@ class MessageAlgorithms():
         self.email = email
 
 class MessageBodyAndHeader():
-    def __init__(self, body: MessageBody, header: MessageSignature):
+    def __init__(self, body, header):
         self.body = body
         self.header = header
 
 class Message():
-    def __init__(self, body_and_header: bytes, session_key: MessageSessionKey):
+    def __init__(self, body_and_header, session_key):
         self.body_and_header = body_and_header
         self.session_key = session_key
 
 class MessageFinal():
-    def __init__(self, message: bytes, algorithms: MessageAlgorithms):
+    def __init__(self, message, algorithms):
         self.algorithms = algorithms
         self.message = message
 
 class MessageEncryptor():
 
-    def __init__(self, algorithms: MessageAlgorithms, message: MessageBody):
+    def __init__(self, algorithms: MessageAlgorithms, message: MessageBody, private_key_ID, public_key_ID, password, reciever_email):
         self.message: bytes = b''
         self.algorithms = algorithms
         self.body: MessageBody = message
+        self.manager = KeyManager.get_manager(algorithms.email)
+        self.encryption_key = None
+        self.signed_key = None
+        self.reciever_key = None
+        if self.manager:
+            self.encryption_key = self.manager.get_keys_withID(int(private_key_ID))[0]
+            self.signed_key = self.manager.get_keys_withID(int(public_key_ID))[0]
+        manager = KeyManager.get_manager(reciever_email)
+        if manager:
+            for key in list(manager.key_dict.values()):
+                if key[1].is_encryption():
+                    self.reciever_key = key[1]
+                    break
+        self.password = password
 
-    def Sign(self, auth, message, A_private_key, A_public_key_ID):
+    def Sign(self, auth, message):
         if not auth or len(auth)==0:
             return None
         else:
         # Hashovanje poruke pomocu SHA-256
-            hash_object = hashlib.sha256()
-            hash_object.update(message)
-            hash_result = hash_object.digest()
 
-        # Enkriptovanje hesha pomocu CAST-128 i privatnog kljuca
-            #iv = os.urandom(16)  # 16 bytes for CAST-128
+            potpis = self.signed_key.sign(message, self.password)
 
-            cipher = Cipher(algorithms.CAST5(A_private_key), modes.ECB(), backend=default_backend())
-            encryptor = cipher.encryptor()
-            encrypted_header = encryptor.update(hash_result) + encryptor.finalize()
-            #encrypted_header = iv + encrypted_header
-            encrypted_header = encrypted_header
-
-            header = MessageSignature(A_public_key_ID, "two_bytes", encrypted_header)
+            header = MessageSignature(self.signed_key.id, "two_bytes", potpis)
 
             return header
 
-    def Encrypt(self, algorithm, B_public_key):
+    def Encrypt(self, algorithm):
         session_key = os.urandom(16)
-        if algorithm == "AES128":
+        if algorithm and self.reciever_key:
             cipher = Cipher(algorithms.AES(session_key), modes.ECB(), backend=default_backend())
-            cipher_Ks = Cipher(algorithms.AES(B_public_key), modes.ECB(), backend=default_backend())
-        elif algorithm == "Cas5":
-            cipher = Cipher(algorithms.CAST5(session_key), modes.ECB(), backend=default_backend())
-            cipher_Ks = Cipher(algorithms.AES(B_public_key), modes.ECB(), backend=default_backend())
         else:
-            print("Bad Encryption Algorithm")
+            print("No Encryption")
             return None
         encryptor = cipher.encryptor()
-        encryptor_KS = cipher_Ks.encryptor()
         encrypthed_message = encryptor.update(self.message) + encryptor.finalize()
-        encrypthed_session_key = encryptor_KS.update(session_key) + encryptor.finalize()
 
-        session_key_header = MessageSessionKey(B_public_key, encrypthed_session_key)
+
+        encrypthed_session_key = self.reciever_key.encrypt(session_key)
+
+        session_key_header = MessageSessionKey(self.reciever_key.id, encrypthed_session_key)
         self.message = encrypthed_message
 
         return session_key_header
@@ -121,12 +122,11 @@ class MessageEncryptor():
         # Get the compressed bytes
         self.message = zip_buffer.getvalue()
 
-    def EncryptMessage(self, A_private_key, A_public_key_ID, B_public_key):
+    def EncryptMessage(self):
 
         # Pretvaranje tela poruke + zaglavlje u bytove
-        body_header = MessageBodyAndHeader(body = self.body,
-                                           header= self.Sign(self.algorithms.authentificaton, pickle.dumps(self.body),
-                                                             A_private_key, A_public_key_ID))
+        body_header = MessageBodyAndHeader(body = self.body,header= self.Sign(self.algorithms.authentificaton, pickle.dumps(self.body)))
+
         self.messsage = pickle.dumps(body_header)
 
         # Zipovanje tela+zaglavlja
@@ -134,7 +134,7 @@ class MessageEncryptor():
             self.Zip()
 
         # Sifrovanje zipovane poruke zajedno sa kljucem sesije
-        session_key_header = self.Encrypt(self.algorithms.encryption, B_public_key)
+        session_key_header = self.Encrypt(self.algorithms.encryption)
         self.message = pickle.dumps(Message(self.message, session_key_header))
 
         # Radix64 konvercija cele poruke
@@ -147,58 +147,42 @@ class MessageEncryptor():
 
 class MessageDecryptor():
 
-    def __init__(self, message: bytes):
+    def __init__(self, message: bytes, email, password):
         self.message = message
+        self.email = email
+        self.password = password
         self.algorithms = None
         self.body = None
+        self.manager = KeyManager.get_manager(email)
+        self.signed_key = None
+        self.reciever_key = None
 
     def Authenticate(self, auth, header):
-        if not auth or len(auth) == 0:
+        if not auth:
             return True
         else:
-            A_manager = KeyManager.get_manager(self.algorithms.email)
-            if not A_manager:
-                return False
 
-            A_public_key_wrapper = A_manager.get_public_key_withID(header.A_public_key_ID)
-            if not A_public_key_wrapper:
-                return False
+            manager = KeyManager.get_manager(self.algorithms.email)
+            if not manager:
+                return
 
-            A_public_key = A_public_key_wrapper.key
+            self.reciever_key = manager.get_keys_withID(int(header.A_public_key_ID))[1]
 
-            cipher = Cipher(algorithms.CAST5(A_public_key), modes.ECB(), backend=default_backend())
-            decryptor = cipher.decryptor()
-            decrypted_header = decryptor.update(header.message_digest) + decryptor.finalize()
+            return self.reciever_key.verify(pickle.dumps(self.body), header.message_digest)
 
-            hash_object = hashlib.sha256()
-            hash_object.update(pickle.dumps(self.body))
-            hash_result = hash_object.digest()
-
-            return decrypted_header == hash_result
 
     def Decrypt(self, algorithm, session_key, A_private_key):
 
-        if not session_key:
+        if not session_key or not self.manager:
             return
 
         # Trazedje Kljuca
 
-        if algorithm == "AES128":
-            cipher_Ks = Cipher(algorithms.AES(A_private_key), modes.ECB(), backend=default_backend())
-        elif algorithm == "Cas5":
-            cipher_Ks = Cipher(algorithms.AES(A_private_key), modes.ECB(), backend=default_backend())
-        else:
-            print("Bad Encryption Algorithm")
-            return
+        if self.manager:
+            self.decryption_key = self.manager.get_keys_withID(int(session_key.B_public_key_ID))[0]
+        Ks = self.decryption_key.decrypt(session_key.session_key)
 
-        decryptor_KS = cipher_Ks.decryptor()
-        decrypthed_session_key = decryptor_KS.update(session_key.session_key) + decryptor_KS.finalize()
-
-        if algorithm == "AES128":
-            cipher = Cipher(algorithms.AES(decrypthed_session_key), modes.ECB(), backend=default_backend())
-        else:
-            cipher = Cipher(algorithms.CAST5(decrypthed_session_key), modes.ECB(), backend=default_backend())
-
+        cipher = Cipher(algorithms.AES(Ks), modes.ECB(), backend=default_backend())
         decryptor = cipher.decryptor()
         decrypthed_message = decryptor.update(self.message) + decryptor.finalize()
 
@@ -218,10 +202,10 @@ class MessageDecryptor():
 
         return extracted_data
 
-    def DencryptMessage(self, B_private_key):
+    def DencryptMessage(self):
 
         # Raspakovati koriscene algoritme zajedno sa porukom
-        poruka_algo: MessageFinal = pickle.loads(self.message)
+        poruka_algo = pickle.loads(self.message)
 
         self.message = poruka_algo.message
         self.algorithms = poruka_algo.algorithms
@@ -231,9 +215,9 @@ class MessageDecryptor():
             self.EnRadix()
 
         # Sifrovanje zipovane poruke zajedno sa kljucem sesije
-        message: Message = pickle.loads(self.message)
+        message = pickle.loads(self.message)
         self.message = message.body_and_header
-        self.Decrypt(self.algorithms.encryption, message.session_key, B_private_key)
+        self.Decrypt(self.algorithms.encryption, message.session_key)
 
         # Unzipovanje tela+zaglavlja
         if self.algorithms.zip:

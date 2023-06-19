@@ -7,9 +7,11 @@ from implementation.message.messagemanager import *
 from PIL import ImageTk, Image
 
 class MessageSend(tk.Tk):
-    def __init__(self):
+    def __init__(self, email, password):
         super().__init__()
         gui.util.init_window(self, "Message Send", "../../asets/neoncity.png")
+        self.user = email
+        self.password = password
         self._init_title()
         self._init_message()
         self._init_email()
@@ -31,9 +33,9 @@ class MessageSend(tk.Tk):
                               background=gui.configuration.LABEL_BG)
         label_msg.grid(column=0, columnspan=2, row=1, padx=5, pady=5)
 
-        self.msg = tk.Variable()
-        entry_msg = tk.Text(self, width=30, height=20)
-        entry_msg.grid(column=0, columnspan=2, rowspan=5, row=2, padx=20, pady=5)
+
+        self.entry_msg = tk.Text(self, width=30, height=20)
+        self.entry_msg.grid(column=0, columnspan=2, rowspan=5, row=2, padx=20, pady=5)
 
     def _init_email(self):
         label_msg = tk.Label(self, text="E-Mail", fg=gui.configuration.LABEL_FG,
@@ -48,20 +50,25 @@ class MessageSend(tk.Tk):
         label_encrypt = tk.Label(self, text="Encryption", fg=gui.configuration.LABEL_FG,
                                background=gui.configuration.LABEL_BG)
         label_encrypt.grid(column=2, columnspan=2, row=2, padx=5, pady=5)
-        label_public_key = tk.Label(self, text="public key = ", fg=gui.configuration.LABEL_FG,
-                                 background=gui.configuration.LABEL_BG)
-        label_public_key.grid(column=6, row=2, padx=5, pady=5)
-        public_keys = [1, 2, 3]
-        self.public_key = tk.IntVar()
-        self.public_key.set(1)
-        optionMenu3 = tk.OptionMenu(self, self.public_key, *public_keys)
-        optionMenu3.grid(column=7, columnspan=2, row=2, padx=5, pady=5)
 
-        algorithms = ['No Encryption', 'TripleDES', 'AES128']
-        self.algorithm = tk.StringVar()
-        self.algorithm.set('No Encryption')
-        optionMenu = tk.OptionMenu(self, self.algorithm, *algorithms)
+        self.encrypt = tk.Variable()
+        self.encrypt.set(False)
+
+        encrypt_check = tk.Checkbutton(self, text="Encryption", variable=self.encrypt)
+        encrypt_check.grid(column=6, columnspan=2, row=2, padx=5, pady=5)
+
+        public_keys = []
+        manager = KeyManager.get_manager(self.user)
+        for key in list(manager.key_dict.values()):
+            if key[1].is_encryption():
+                public_keys.append(key[1].id)
+
+        self.public_key = tk.StringVar()
+        self.public_key.set(public_keys[0])
+        optionMenu = tk.OptionMenu(self, self.public_key, *public_keys)
         optionMenu.grid(column=4, columnspan=2, row=2, padx=5, pady=5)
+
+
     def _init_authentication(self):
         label_auth = tk.Label(self, text="Authentication", fg=gui.configuration.LABEL_FG,
                                    background=gui.configuration.LABEL_BG)
@@ -73,9 +80,16 @@ class MessageSend(tk.Tk):
         auth_check = tk.Checkbutton(self, text = "SHA-1", variable = self.auth)
         auth_check.grid(column=6, columnspan=2, row=3, padx=5, pady=5)
 
-        private_keys = ['1', '2', '3']
+        private_keys = []
+        manager = KeyManager.get_manager(self.user)
+        for key in list(manager.key_dict.values()):
+
+            if key[0].is_signature():
+                private_keys.append(key[0].id)
+
+
         self.private_key = tk.StringVar()
-        self.private_key.set('1')
+        self.private_key.set(private_keys[0])
         optionMenu2 = tk.OptionMenu(self, self.private_key, *private_keys)
         optionMenu2.grid(column=4, columnspan=2, row=3, padx=5, pady=5)
     def _init_compresion(self):
@@ -118,13 +132,29 @@ class MessageSend(tk.Tk):
 
 
     def _init_button(self):
-        send_msg = tk.Button(self, text = "Send Message", command= lambda : MessageManager.send(self.path.get(),
-                                                                                                      self.email.get(), self.msg.get(), self.private_key.get(),
-                                                                                                      self.public_key.get(), self.auth.get(), self.algorithm.get(),
-                                                                                                      self.zip.get(), self.radix.get()))
+        label_user = tk.Label(self, text=f"Loged In as: {self.user}", fg=gui.configuration.LABEL_FG,
+                              background=gui.configuration.LABEL_BG)
+        label_user.grid(column=0, columnspan=2, row=10, padx=5, pady=5)
+        send_msg = tk.Button(self, text = "Send Message",
+                             command= lambda : MessageManager.send(self.path.get(), self.email.get(), self.user, self.password, self.entry_msg.get("1.0", "end-1c"),
+                                                                   self.private_key.get(), self.public_key.get(),
+                                                                   self.auth.get(), self.encrypt.get(),
+                                                                   self.zip.get(), self.radix.get()))
         send_msg.grid(column=6, columnspan=2, row=10, padx=5, pady=5)
 
 # Test for gui
 if __name__ == "__main__":
-    window = MessageSend()
+    km, msg = KeyManager.get_key_manager("mika", "mika@gmail.com")
+    km2, msg2 = KeyManager.get_key_manager("zika", "zika@gmail.com")
+    km3, msg3 = KeyManager.get_key_manager("pera", "p")
+    km4, msg4 = KeyManager.get_key_manager("koja", "k")
+    km.gen_keys(2048, "RSA", "123")
+    km2.gen_keys(2048, "RSA", "123")
+    km3.gen_keys(2048, "DSA", "123")
+    km4.gen_keys(2048, "DSA", "123")
+    km.gen_keys(1024, "Elgamal", "123")
+    km2.gen_keys(1024, "Elgamal", "123")
+    km3.gen_keys(1024, "Elgamal", "123")
+    km4.gen_keys(1024, "Elgamal", "123")
+    window = MessageSend("mika@gmail.com", "123")
     window.mainloop()
