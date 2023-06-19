@@ -4,6 +4,7 @@ import gui.util
 from implementation.keymanagement.keymanager import KeyManager
 import re
 from gui.keygen.passwordmodal import PasswordModal, PrivateKeyShowModal
+from gui.keygen.exportmodal import ExportModal
 from gui.controller import GuiController
 from implementation.keymanagement.keywrapper.keywrapper import  KeyWrapper
 
@@ -17,9 +18,10 @@ class KeyViewGui(tk.Toplevel):
         self._init_name()
         self._init_email()
         self._init_button()
+        self._init_import_button()
         self._init_message_label()
         self._init_scrollbar()
-        self.added_frame.grid(column=0, columnspan= 7, row= 3)
+        self.added_frame.grid(column=0, columnspan= 7, row= 4)
         self.added_widgets = []
 
     def _init_menu(self):
@@ -76,6 +78,10 @@ class KeyViewGui(tk.Toplevel):
         button_show = tk.Button(self, text= "Show keys", command= lambda: self._show_keys(self.name.get(), self.email.get()))
         button_show.grid(column= 0, columnspan= 2, row = 2, padx = 5, pady = 5)
 
+    def _init_import_button(self):
+        button_import = tk.Button(self, text= "Import key", command= lambda: print("Hello"))
+        button_import.grid(column= 0, columnspan= 2, row = 3, padx = 5, pady = 5)
+
     def _show_keys(self, name: str, email: str):
         self.text.delete("1.0", "end")
         if re.search(".+@.+", email) is None:
@@ -117,11 +123,25 @@ class KeyViewGui(tk.Toplevel):
                         temp_text = "\t\t"
 
                 self.text.insert(tk.END, text_to_display)
+                self.text.insert(tk.END, "\n\t\t")
+                self.text.window_create(self.text.index("end"), window = tk.Button(self.text, text = "Export public key", command = lambda: self._export_key(key_dict[key_to_keys][1], email)))
+                self.text.insert(tk.END, "\n")
+            else:
+                self.text.insert(tk.END, "\t\tPublic key not yet imported\n")
+
             if key_dict[key_to_keys][0] != None:
                 self.text.insert(tk.END, "\t\t")
-                self.text.window_create(self.text.index("end"), window = tk.Button(self.text, text = "See private key", command= lambda: self._see_private_key(key_dict[key_to_keys][1])))
+                self.text.window_create(self.text.index("end"), window = tk.Button(self.text, text = "See private key", command= lambda: self._see_private_key(key_dict[key_to_keys][0])))
+                self.text.insert(tk.END, "\t")
+                self.text.window_create(self.text.index("end"), window = tk.Button(self.text, text = "Export private key", command = lambda: self._export_key(key_dict[key_to_keys][0], email)))
                 self.text.insert(tk.END, "\n")
+            else:
+                self.text.insert(tk.END, "\t\tPrivate key not yet imported\n")
 
     def _see_private_key(self, private_key_wrapper: KeyWrapper):
         show_private_key_modal: PrivateKeyShowModal = PrivateKeyShowModal(self, private_key_wrapper)
         self.wait_window(show_private_key_modal)
+
+    def _export_key(self, public_key_wrapper: KeyWrapper, email: str):
+        export_modal: ExportModal = ExportModal(self, public_key_wrapper, email)
+        self.wait_window(export_modal)
