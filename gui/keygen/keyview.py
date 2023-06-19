@@ -19,10 +19,11 @@ class KeyViewGui(tk.Toplevel):
         self._init_name()
         self._init_email()
         self._init_button()
+        self._init_show_public_keys_button()
         self._init_import_button()
         self._init_message_label()
         self._init_scrollbar()
-        self.added_frame.grid(column=0, columnspan= 7, row= 4)
+        self.added_frame.grid(column=0, columnspan= 7, row= 5)
         self.added_widgets = []
 
     def _init_menu(self):
@@ -76,12 +77,16 @@ class KeyViewGui(tk.Toplevel):
         scrollbar.config(command=self.text.yview)
 
     def _init_button(self):
-        button_show = tk.Button(self, text= "Show keys", command= lambda: self._show_keys(self.name.get(), self.email.get()))
+        button_show = tk.Button(self, text= "Show my keys", command= lambda: self._show_keys(self.name.get(), self.email.get()))
         button_show.grid(column= 0, columnspan= 2, row = 2, padx = 5, pady = 5)
+
+    def _init_show_public_keys_button(self):
+        button_show = tk.Button(self, text= "Show public keys", command= lambda: self._show_public_keys(self.name.get(), self.email.get()))
+        button_show.grid(column= 0, columnspan= 2, row = 3, padx = 5, pady = 5)
 
     def _init_import_button(self):
         button_import = tk.Button(self, text= "Import key", command= lambda: self._import_key(self.name.get(), self.email.get()))
-        button_import.grid(column= 0, columnspan= 2, row = 3, padx = 5, pady = 5)
+        button_import.grid(column= 0, columnspan= 2, row = 4, padx = 5, pady = 5)
 
     def _show_keys(self, name: str, email: str):
         self.text.delete("1.0", "end")
@@ -170,3 +175,32 @@ class KeyViewGui(tk.Toplevel):
         import_modal = ImportModal(self, email, key_manager)
         self.wait_window(import_modal)
         self._show_keys(name, email)
+
+    def _show_public_keys(self, name, email):
+        self.text.delete("1.0", "end")
+        if re.search(".+@.+", email) is None:
+            message: str = "Email not valid"
+            self.text.insert(tk.END, message)
+            return
+        if len(name) == 0:
+            message: str = "No 0-length names allowed"
+            self.text.insert(tk.END, message)
+            return
+
+        key_manager_or_None = KeyManager.get_key_manager(name, email)
+
+        if key_manager_or_None[0] is None:
+            self.text.insert(tk.END, key_manager_or_None[1])
+            return
+        key_manager: KeyManager = key_manager_or_None[0]
+
+        for key_manager_key in KeyManager.KEY_MANAGER_DICT:
+            key_manager = KeyManager.KEY_MANAGER_DICT[key_manager_key]
+            self.text.insert(tk.END, "email: " + key_manager_key + "\n")
+            all_keys: dict = key_manager.get_keys()
+            for key_to_keys in all_keys:
+                if all_keys[key_to_keys][1]:
+                    key_wrapper: KeyWrapper = all_keys[key_to_keys][1]
+                    self.text.insert(tk.END, "\tid: " + hex(key_wrapper.get_parameters()["id"]) +
+                                     "\n\t\talgorithm: " + key_wrapper.get_algorithm() +
+                                     "\n\t\tsize: " + str(key_wrapper.size) + "\n")
