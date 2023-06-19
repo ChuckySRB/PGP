@@ -1,4 +1,4 @@
 .*
 .idea/*
 venv
->>>>>>> e0548a959d2debf83c093fcb459f5b4222d176b2
+*.pem
