@@ -67,6 +67,10 @@ class KeyManager:
     def get_keys(self):
         return self.key_dict
 
+    def delete_key_pair(self, id: int):
+        if id in self.key_dict:
+            self.key_dict.pop(id)
+
 
 
 

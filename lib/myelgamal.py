@@ -3,6 +3,7 @@ import cryptography.hazmat.primitives.asymmetric.dsa as dsa
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 import base64
 
+
 def compute_mod_inverse(q, K):
     num1: int = q
     num2: int = K
