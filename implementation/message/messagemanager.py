@@ -14,6 +14,8 @@ class MessageManager:
 
         MessageFileReader.Send(path, "message", encryptor.message)
 
+        print (MessageManager.read(email_reciever, password, path+"/message.pgp"))
+
     @staticmethod
     def read(user_email, password, file_path):
 
@@ -27,7 +29,7 @@ class MessageManager:
         decryptor.DencryptMessage()
 
         if decryptor.body:
-            return decryptor.body.body
+            return decryptor.body.data
 
         return "Fail"
 

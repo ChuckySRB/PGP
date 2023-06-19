@@ -127,10 +127,11 @@ class MessageEncryptor():
 
     def EncryptMessage(self):
 
+        print("Encryption")
         # Pretvaranje tela poruke + zaglavlje u bytove
         body_header = MessageBodyAndHeader(body = self.body,header= self.Sign(self.algorithms.authentificaton, pickle.dumps(self.body)))
-
-        self.messsage = pickle.dumps(body_header)
+       
+        self.message = pickle.dumps(body_header)
 
         # Zipovanje tela+zaglavlja
         if self.algorithms.zip:
@@ -138,14 +139,21 @@ class MessageEncryptor():
 
         # Sifrovanje zipovane poruke zajedno sa kljucem sesije
         session_key_header = self.Encrypt(self.algorithms.encryption)
-        self.message = pickle.dumps(Message(self.message, session_key_header))
+
+        message = Message(self.message, session_key_header)
+
+        self.message = pickle.dumps(message)
+
 
         # Radix64 konvercija cele poruke
         if self.algorithms.radix64:
             self.Radix()
 
         # Pakovanje koriscenih algoritama zajedno sa porukom kao uputsvo za dekripciju
-        self.message = pickle.dumps(MessageFinal(self.message, algorithms= self.algorithms))
+        message_finale = MessageFinal(self.message, algorithms= self.algorithms)
+
+        self.message = pickle.dumps(message_finale)
+
 
 
 class MessageDecryptor():
@@ -174,20 +182,24 @@ class MessageDecryptor():
             return self.reciever_key.verify(pickle.dumps(self.body), header.message_digest)
 
 
-    def Decrypt(self, algorithm, session_key, A_private_key):
+    def Decrypt(self, algorithm, session_key):
 
-        if not session_key or not self.manager:
+        if not session_key or not self.manager or not algorithm:
             return
 
         # Trazedje Kljuca
 
         if self.manager:
             self.decryption_key = self.manager.get_keys_withID(int(session_key.B_public_key_ID))[0]
-        Ks = self.decryption_key.decrypt(session_key.session_key)
+        Ks = self.decryption_key.decrypt(session_key.session_key, self.password)
 
         cipher = Cipher(algorithms.AES(Ks), modes.ECB(), backend=default_backend())
+
         decryptor = cipher.decryptor()
         decrypthed_message = decryptor.update(self.message) + decryptor.finalize()
+
+        aes_padding = PKCS7(algorithms.AES.block_size).unpadder()
+        decrypthed_message = aes_padding.update(decrypthed_message) + aes_padding.finalize()
 
         self.message = decrypthed_message
 
@@ -206,11 +218,12 @@ class MessageDecryptor():
         return extracted_data
 
     def DencryptMessage(self):
-
+        print("Decryption")
         # Raspakovati koriscene algoritme zajedno sa porukom
         poruka_algo = pickle.loads(self.message)
 
         self.message = poruka_algo.message
+
         self.algorithms = poruka_algo.algorithms
 
         # Radix64 konvercija cele poruke
@@ -218,8 +231,9 @@ class MessageDecryptor():
             self.EnRadix()
 
         # Sifrovanje zipovane poruke zajedno sa kljucem sesije
-        message = pickle.loads(self.message)
+        message:Message = pickle.loads(self.message)
         self.message = message.body_and_header
+
         self.Decrypt(self.algorithms.encryption, message.session_key)
 
         # Unzipovanje tela+zaglavlja
@@ -229,7 +243,6 @@ class MessageDecryptor():
         # Raspakovanje porukke
         body_header: MessageBodyAndHeader = pickle.loads(self.message)
         self.body = body_header.body
-
         # Provera potpisa poruke
         return self.Authenticate(self.algorithms.authentificaton, body_header.header)
 
