@@ -133,16 +133,20 @@ class KeyViewGui(tk.Toplevel):
                 self.text.window_create(self.text.index("end"), window = tk.Button(self.text, text = "Export public key", command = lambda: self._export_key(key_dict[key_to_keys][1], email)))
                 self.text.insert(tk.END, "\n")
             else:
-                self.text.insert(tk.END, "\t\tPublic key not yet imported\n")
+                self.text.insert(tk.END, "\tPublic key not yet imported\n")
 
             if key_dict[key_to_keys][0] != None:
-                self.text.insert(tk.END, "\t\t")
+                self.text.insert(tk.END, "\tpriv_key:\n\t\t")
                 self.text.window_create(self.text.index("end"), window = tk.Button(self.text, text = "See private key", command= lambda: self._see_private_key(key_dict[key_to_keys][0])))
                 self.text.insert(tk.END, "\t")
                 self.text.window_create(self.text.index("end"), window = tk.Button(self.text, text = "Export private key", command = lambda: self._export_key(key_dict[key_to_keys][0], email)))
                 self.text.insert(tk.END, "\n")
             else:
-                self.text.insert(tk.END, "\t\tPrivate key not yet imported\n")
+                self.text.insert(tk.END, "\tPrivate key not yet imported\n")
+
+            self.text.insert(tk.END, "\t")
+            self.text.window_create(self.text.index("end"), window = tk.Button(self.text, text = "Delete keys", command= lambda: self._delete_key_pair(key_manager, key_to_keys, name, email)))
+            self.text.insert(tk.END, "\n")
 
     def _see_private_key(self, private_key_wrapper: KeyWrapper):
         show_private_key_modal: PrivateKeyShowModal = PrivateKeyShowModal(self, private_key_wrapper)
@@ -204,3 +208,7 @@ class KeyViewGui(tk.Toplevel):
                     self.text.insert(tk.END, "\tid: " + hex(key_wrapper.get_parameters()["id"]) +
                                      "\n\t\talgorithm: " + key_wrapper.get_algorithm() +
                                      "\n\t\tsize: " + str(key_wrapper.size) + "\n")
+
+    def _delete_key_pair(self, key_manager: KeyManager, id: int, name, email):
+        key_manager.delete_key_pair(id)
+        self._show_keys(name, email)
