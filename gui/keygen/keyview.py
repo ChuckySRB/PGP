@@ -7,6 +7,7 @@ from gui.keygen.passwordmodal import PasswordModal, PrivateKeyShowModal
 from gui.keygen.exportmodal import ExportModal
 from gui.controller import GuiController
 from implementation.keymanagement.keywrapper.keywrapper import  KeyWrapper
+from gui.keygen.importmodal import  ImportModal
 
 class KeyViewGui(tk.Toplevel):
     def __init__(self, image_path: str):
@@ -79,7 +80,7 @@ class KeyViewGui(tk.Toplevel):
         button_show.grid(column= 0, columnspan= 2, row = 2, padx = 5, pady = 5)
 
     def _init_import_button(self):
-        button_import = tk.Button(self, text= "Import key", command= lambda: print("Hello"))
+        button_import = tk.Button(self, text= "Import key", command= lambda: self._import_key(self.name.get(), self.email.get()))
         button_import.grid(column= 0, columnspan= 2, row = 3, padx = 5, pady = 5)
 
     def _show_keys(self, name: str, email: str):
@@ -145,3 +146,27 @@ class KeyViewGui(tk.Toplevel):
     def _export_key(self, public_key_wrapper: KeyWrapper, email: str):
         export_modal: ExportModal = ExportModal(self, public_key_wrapper, email)
         self.wait_window(export_modal)
+
+    def _import_key(self, name: str, email: str):
+        if re.search(".+@.+", email) is None:
+            message: str = "Email not valid"
+            self.text.delete("1.0", "end")
+            self.text.insert(tk.END, message)
+            return
+        if len(name) == 0:
+            message: str = "No 0-length names allowed"
+            self.text.delete("1.0", "end")
+            self.text.insert(tk.END, message)
+            return
+
+        key_manager_or_None = KeyManager.get_key_manager(name, email)
+
+        if key_manager_or_None[0] is None:
+            self.text.delete("1.0", "end")
+            self.text.insert(tk.END, key_manager_or_None[1])
+            return
+        key_manager: KeyManager = key_manager_or_None[0]
+
+        import_modal = ImportModal(self, email, key_manager)
+        self.wait_window(import_modal)
+        self._show_keys(name, email)
