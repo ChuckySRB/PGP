@@ -5,13 +5,13 @@ import hashlib
 import io
 import zipfile
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import padding
+#from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
 import os
 from implementation.keymanagement.keymanager import *
 
-#Izdelio sam klase kako bih ih lakše upakovao u bajtove po redosledu u kom se pakuju
 
+# Izdelio sam klase kako bih ih lakše upakovao u bajtove po redosledu u kom se pakuju
 
 class MessageSessionKey():
     def __init__(self, B_public_key_ID, session_key):
@@ -30,7 +30,9 @@ class MessageBody():
         self.filename = filename
         self.timestamp = time.time()
         self.data = data
+# Tri iznad su osnovne strukture sa slike sa slajdova
 
+# Ove ispod su spakovane strukture koje se pojavljuju tokom sifrovanja
 class MessageAlgorithms():
     def __init__(self, authentification, encryption, zip, radix64, email):
         self.authentificaton = authentification
@@ -57,7 +59,7 @@ class MessageFinal():
 class MessageEncryptor():
 
     def __init__(self, algorithms: MessageAlgorithms, message: MessageBody):
-        self.message = None
+        self.message: bytes = b''
         self.algorithms = algorithms
         self.body: MessageBody = message
 
@@ -108,19 +110,23 @@ class MessageEncryptor():
         self.message = base64.b64encode(self.message)
 
     def Zip(self):
-        # Create an in-memory zip file
+        # Create an in-memory buffer
         zip_buffer = io.BytesIO()
+
+        # Create a ZipFile object with the buffer
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-            # Write the bytes message to the zip file
+            # Add the data to the zip file
             zip_file.writestr('data', self.message)
 
-        # Get the zipped bytes message
-        self.messsage = zip_buffer.getvalue()
+        # Get the compressed bytes
+        self.message = zip_buffer.getvalue()
 
     def EncryptMessage(self, A_private_key, A_public_key_ID, B_public_key):
 
         # Pretvaranje tela poruke + zaglavlje u bytove
-        body_header = MessageBodyAndHeader(body = self.body, header= self.Sign(self.algorithms.authentificaton, pickle.dumps(self.body), A_private_key, A_public_key_ID))
+        body_header = MessageBodyAndHeader(body = self.body,
+                                           header= self.Sign(self.algorithms.authentificaton, pickle.dumps(self.body),
+                                                             A_private_key, A_public_key_ID))
         self.messsage = pickle.dumps(body_header)
 
         # Zipovanje tela+zaglavlja
@@ -139,12 +145,11 @@ class MessageEncryptor():
         self.message = pickle.dumps(MessageFinal(self.message, algorithms= self.algorithms))
 
 
-class MessageDencryptor():
+class MessageDecryptor():
 
-    def __init__(self, message: bytes, B_private_key):
+    def __init__(self, message: bytes):
         self.message = message
         self.algorithms = None
-        self.private_key = B_private_key
         self.body = None
 
     def Authenticate(self, auth, header):
@@ -202,14 +207,18 @@ class MessageDencryptor():
     def EnRadix(self):
         self.message = base64.b64decode(self.message)
 
-    def UnZip(self):
+    def UnZip(self, message):
         # Create an in-memory zip file
-        zip_buffer = io.BytesIO(self.message)
+        zip_buffer = io.BytesIO(message)
+
+        # Create a ZipFile object with the buffer
         with zipfile.ZipFile(zip_buffer, 'r', zipfile.ZIP_DEFLATED) as zip_file:
             # Extract the data from the zip file
-            self.message = zip_file.read('data')
+            extracted_data = zip_file.read('data')
 
-    def DencryptMessage(self, A_private_key, A_public_key_ID):
+        return extracted_data
+
+    def DencryptMessage(self, B_private_key):
 
         # Raspakovati koriscene algoritme zajedno sa porukom
         poruka_algo: MessageFinal = pickle.loads(self.message)
@@ -224,11 +233,11 @@ class MessageDencryptor():
         # Sifrovanje zipovane poruke zajedno sa kljucem sesije
         message: Message = pickle.loads(self.message)
         self.message = message.body_and_header
-        self.Decrypt(self.algorithms.encryption, message.session_key)
+        self.Decrypt(self.algorithms.encryption, message.session_key, B_private_key)
 
         # Unzipovanje tela+zaglavlja
         if self.algorithms.zip:
-            self.UnZip()
+            self.message = self.UnZip(self.message)
 
         # Raspakovanje porukke
         body_header: MessageBodyAndHeader = pickle.loads(self.message)

@@ -31,12 +31,12 @@ class KeyManager:
             return None
 
     @staticmethod
-    def get_public_key(email):
+    def get_keypair(email):
         if email in KeyManager.KEY_MANAGER_DICT:
             keys = KeyManager.KEY_MANAGER_DICT[email].key_dict
             if len(keys) == 0:
                 return [None, "The user has no public keys!"]
-            return [list(keys.values())[0][1], "Key sent"]
+            return [list(keys.values())[0], "Key sent"]
 
         return [None, "Provided E-Mail does not exist!"]
 

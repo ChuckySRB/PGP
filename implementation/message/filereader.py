@@ -19,6 +19,10 @@ class MessageFileReader():
         if len(file_path) == 0:
             return None, "Error: No File Path provided!"
 
-        with open(file_path, "wb") as file:
-            return file.read(), "Message read done!"
+        try:
+            with open(file_path, 'rb') as file:
+                byts = file.read()
+                return byts, "Fajl Ucitan"
+        except IOError as e:
+            print("Error reading file:", str(e))
 

@@ -73,9 +73,9 @@ class MessageSend(tk.Tk):
         auth_check = tk.Checkbutton(self, text = "SHA-1", variable = self.auth)
         auth_check.grid(column=6, columnspan=2, row=3, padx=5, pady=5)
 
-        private_keys = [1, 2, 3]
-        self.private_key = tk.IntVar()
-        self.private_key.set(1)
+        private_keys = ['1', '2', '3']
+        self.private_key = tk.StringVar()
+        self.private_key.set('1')
         optionMenu2 = tk.OptionMenu(self, self.private_key, *private_keys)
         optionMenu2.grid(column=4, columnspan=2, row=3, padx=5, pady=5)
     def _init_compresion(self):
@@ -119,9 +119,9 @@ class MessageSend(tk.Tk):
 
     def _init_button(self):
         send_msg = tk.Button(self, text = "Send Message", command= lambda : MessageManager.send(self.path.get(),
-                                                                                                      self.email.get(), self.private_key,
-                                                                                                      self.public_key, self.auth, self.algorithm,
-                                                                                                      self.zip, self.radix))
+                                                                                                      self.email.get(), self.msg.get(), self.private_key.get(),
+                                                                                                      self.public_key.get(), self.auth.get(), self.algorithm.get(),
+                                                                                                      self.zip.get(), self.radix.get()))
         send_msg.grid(column=6, columnspan=2, row=10, padx=5, pady=5)
 
 # Test for gui
