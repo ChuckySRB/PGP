@@ -9,6 +9,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 import hashlib
+import base64
 
 ID_MASK: int = (1 << 64) - 1
 
@@ -23,6 +24,8 @@ class IncorrectKeyPassword(Exception):
 class KeyWrapper(ABC):
     key = None
     size = 0
+    hashed_password = None
+    serialized_key = None
     # @abstractmethod
     def export_key(self, file_location: str, email: str, password:str = None):
         if not self.is_private():
@@ -36,6 +39,21 @@ class KeyWrapper(ABC):
 
             with open(file_location, "wb") as f:
                 f.write(pem)
+        else:
+            if self.hashed_password.hexdigest() != hashlib.sha1(password.encode(encoding='utf-8')).hexdigest():
+                raise IncorrectKeyPassword
+            pem: bytes = self.serialized_key
+
+            pem_list: list = pem.splitlines()
+            pem_list.insert(1, ("* " + self.get_algorithm() + " " + str(self.size)).encode("utf-8"))
+            pem_list.insert(2, base64.b64encode(self.hashed_password.digest()))
+            pem = b'\n'.join(pem_list)
+
+            with open(file_location, "wb") as f:
+                f.write(pem)
+
+
+
 
     @staticmethod
     def import_key(file_location: str, password: str = None):
@@ -63,6 +81,32 @@ class KeyWrapper(ABC):
             elgamal_public_key: elgamal.ElgamalPublicKey = elgamal.Elgamal.load_pem_public_key(pem)
             elgamal_key_wrapper: ElgamalPublicKeyWrapper = ElgamalPublicKeyWrapper(elgamal_public_key, size)
             return email, algorithm, size, elgamal_key_wrapper
+        elif b'PRIVATE' in pem_list[0]:
+            pem_list = pem.splitlines()
+            password_hash: bytes = base64.b64decode(pem_list[1])
+            if hashlib.sha1(password.encode("utf-8")).digest() != password_hash:
+                raise IncorrectKeyPassword
+            pem_list.remove(pem_list[1])
+            pem = b'\n'.join(pem_list)
+
+            if algorithm == "RSA":
+                rsa_private_key: rsa.RSAPrivateKey = serialization.load_pem_private_key(
+                    pem, password=(bytes(password, 'utf-8'))
+                )
+                rsa_key_wrapper: RSAPrivateKeyWrapper = RSAPrivateKeyWrapper(rsa_private_key, size, password)
+                return email, algorithm, size, rsa_key_wrapper
+            elif algorithm == "DSA":
+                dsa_private_key: dsa.DSAPrivateKey = serialization.load_pem_private_key(
+                    pem, password=(bytes(password, 'utf-8'))
+                )
+                dsa_key_wrapper: DSAPrivateKeyWrapper = DSAPrivateKeyWrapper(dsa_private_key, size, password)
+                return email, algorithm, size, dsa_key_wrapper
+
+            elif algorithm == "Elgamal":
+                pem += b'\n'
+                elgamal_private_key: elgamal.ElgamalPrivateKey = elgamal.Elgamal.load_pem_private_key(pem, password)
+                elgamal_key_wrapper: ElgamalPrivateKeyWrapper = ElgamalPrivateKeyWrapper(elgamal_private_key, size, password)
+                return email, algorithm, size, elgamal_key_wrapper
 
         return None, None, None, None
     @staticmethod
@@ -492,6 +536,27 @@ if __name__ == "__main__":
     dsa_public_key_wrapper.export_key("dsa_pub_key.pem", "a@a")
     elgamal_public_key_wrapper.export_key("elgamal_pub_key.pem", "k@k")
 
+
+
     print("Cool") if rsa_public_wrapper.key.public_numbers().n == KeyWrapper.import_key("rsa_pub_key.pem")[3].key.public_numbers().n else print("Not cool")
     print("Cool") if dsa_public_key_wrapper.key.public_numbers().y == KeyWrapper.import_key("dsa_pub_key.pem")[3].key.public_numbers().y else print("Not cool")
     print("Cool") if elgamal_public_key_wrapper.key.Ya == KeyWrapper.import_key("elgamal_pub_key.pem")[3].key.Ya else print("Not cool")
+
+    rsa_private_wrapper.export_key("rsa_private_key.pem", "j@j", "Sifra")
+    dsa_private_key_wrapper.export_key("dsa_private_key.pem", "a@a", "Sifra123")
+    elgamal_private_key_wrapper.export_key("elgamal_private_key.pem", "k@k", "Sifra334")
+
+    print("Cool") if rsa_private_wrapper.get_parameters("Sifra")["d"] \
+                     == \
+                     KeyWrapper.import_key("rsa_private_key.pem", "Sifra")[3].get_parameters("Sifra")["d"] \
+        else print("Not cool")
+
+    print("Cool") if dsa_private_key_wrapper.get_parameters("Sifra123")["x"] \
+                     == \
+                     KeyWrapper.import_key("dsa_private_key.pem", "Sifra123")[3].get_parameters("Sifra123")["x"] \
+        else print("Not cool")
+
+    print("Cool") if elgamal_private_key_wrapper.get_parameters("Sifra334")["Xa"] \
+                     == \
+                     KeyWrapper.import_key("elgamal_private_key.pem", "Sifra334")[3].get_parameters("Sifra334")["Xa"] \
+        else print("Not cool")
