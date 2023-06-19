@@ -81,5 +81,5 @@ if __name__ == "__main__":
     km2.gen_keys(1024, "Elgamal", "123")
     km3.gen_keys(1024, "Elgamal", "123")
     km4.gen_keys(1024, "Elgamal", "123")
-    window = MessageRead("mika@gmail.com", "123")
+    window = MessageRead("zika@gmail.com", "123")
     window.mainloop()
