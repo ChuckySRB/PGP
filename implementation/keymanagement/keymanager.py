@@ -23,10 +23,12 @@ class KeyManager:
 
         return [KeyManager.KEY_MANAGER_DICT[email], "OK"]
 
-    def __init__(self, name: str, email: str):
-        self.name: str = name
-        self.email: str = email
-        self.key_dict: dict = {}
+    @staticmethod
+    def get_manager(email: str):
+        if email in KeyManager.KEY_MANAGER_DICT:
+            return KeyManager.KEY_MANAGER_DICT[email]
+        else:
+            return None
 
     @staticmethod
     def get_public_key(email):
@@ -37,6 +39,11 @@ class KeyManager:
             return [list(keys.values())[0][1], "Key sent"]
 
         return [None, "Provided E-Mail does not exist!"]
+
+    def __init__(self, name: str, email: str):
+        self.name: str = name
+        self.email: str = email
+        self.key_dict: dict = {}
 
 
 
@@ -51,6 +58,11 @@ class KeyManager:
             if public_key_wrapper.get_parameters()["id"] not in self.key_dict.keys():
                 unique = True
         self.key_dict[public_key_wrapper.get_parameters()["id"]] = (private_key_wrapper, public_key_wrapper)
+
+    def get_public_key_withID(self, key_ID):
+        if key_ID not in self.key_dict:
+            return None
+        return self.key_dict[key_ID][1]
 
     def get_keys(self):
         return self.key_dict
