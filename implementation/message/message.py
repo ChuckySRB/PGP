@@ -130,7 +130,7 @@ class MessageEncryptor():
         print("Encryption")
         # Pretvaranje tela poruke + zaglavlje u bytove
         body_header = MessageBodyAndHeader(body = self.body,header= self.Sign(self.algorithms.authentificaton, pickle.dumps(self.body)))
-       
+
         self.message = pickle.dumps(body_header)
 
         # Zipovanje tela+zaglavlja
@@ -217,7 +217,7 @@ class MessageDecryptor():
 
         return extracted_data
 
-    def DencryptMessage(self):
+    def DecryptMessage(self):
         print("Decryption")
         # Raspakovati koriscene algoritme zajedno sa porukom
         poruka_algo = pickle.loads(self.message)

@@ -26,7 +26,7 @@ class MessageManager:
             return msg
 
         decryptor = MessageDecryptor(message_b, user_email, password)
-        decryptor.DencryptMessage()
+        decryptor.DecryptMessage()
 
         if decryptor.body:
             return decryptor.body.data
